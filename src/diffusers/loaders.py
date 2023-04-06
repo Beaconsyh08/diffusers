@@ -73,7 +73,9 @@ class AttnProcsLayers(torch.nn.Module):
                 del state_dict[key]
 
         self._register_state_dict_hook(map_to)
-        self._register_load_state_dict_pre_hook(map_from, with_module=True)
+        # self._register_load_state_dict_pre_hook(map_from, with_module=True)
+        self._register_load_state_dict_pre_hook(map_from,)
+        
 
 
 class UNet2DConditionLoadersMixin:

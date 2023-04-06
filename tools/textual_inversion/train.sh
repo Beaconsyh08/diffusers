@@ -1,7 +1,9 @@
-export MODEL_NAME="runwayml/stable-diffusion-v1-5"
-export DATA_DIR="/root/diffusers/data/train/finetune/cat_toy"
+DATA_NAME="cat_toy"
+export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/stable-diffusion-v1-5"
+export DATA_DIR="./data/train/finetune/$DATA_NAME"
+export OUTPUT_DIR="./res/finetune/textual_inversion/$DATA_NAME"
 
-accelerate launch /root/diffusers/examples/textual_inversion/textual_inversion.py \
+accelerate launch ./examples/textual_inversion/textual_inversion.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
   --train_data_dir=$DATA_DIR \
   --learnable_property="object" \
@@ -13,7 +15,7 @@ accelerate launch /root/diffusers/examples/textual_inversion/textual_inversion.p
   --learning_rate=5.0e-04 --scale_lr \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
-  --output_dir="textual_inversion_cat" \
+  --output_dir=$OUTPUT_DIR \
 
   # If inf during training
   # --validation_prompt="A <cat-toy> backpack" \

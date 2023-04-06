@@ -1,9 +1,9 @@
-export MODEL_NAME="runwayml/stable-diffusion-v1-5"
-export OUTPUT_DIR="/root/diffusers/res/finetune/lora"
+export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/stable-diffusion-v1-5"
+export OUTPUT_DIR="./res/finetune/lora"
 export HUB_MODEL_ID="pokemon-lora"
-# export DATASET_NAME="/root/diffusers/data/train/finetune/pokemon"
+export DATASET_NAME="./data/train/finetune/pokemon"
 
-accelerate launch --mixed_precision="fp16"  /root/diffusers/examples/text_to_image/train_text_to_image_lora.py \
+accelerate launch --mixed_precision="fp16"  ./examples/text_to_image/train_text_to_image_lora.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
   --dataset_name=$DATASET_NAME \
   --dataloader_num_workers=8 \

@@ -1,9 +1,11 @@
-export MODEL_NAME="runwayml/stable-diffusion-v1-5"
-export INSTANCE_DIR="/root/diffusers/data/train/finetune/dog"
-export OUTPUT_DIR="/root/diffusers/res/finetune/dreambooth_lora/dog"
+accelerate config default
+DATA_NAME="dog"
+export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/stable-diffusion-v1-5"
+export INSTANCE_DIR="./data/train/finetune/$DATA_NAME"
+export OUTPUT_DIR="./res/finetune/dreambooth_lora/$DATA_NAME"
 WANDB_DISABLE_SERVICE=true
 
-accelerate launch /root/diffusers/examples/dreambooth/train_dreambooth_lora.py \
+accelerate launch ./examples/dreambooth/train_dreambooth_lora.py \
   --pretrained_model_name_or_path=$MODEL_NAME  \
   --instance_data_dir=$INSTANCE_DIR \
   --output_dir=$OUTPUT_DIR \
