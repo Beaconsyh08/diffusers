@@ -1,3 +1,4 @@
+accelerate config default
 DATA_NAME="cat_toy"
 export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/stable-diffusion-v1-5"
 export DATA_DIR="./data/train/finetune/$DATA_NAME"

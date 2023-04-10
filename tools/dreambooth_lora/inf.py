@@ -18,4 +18,5 @@ image = pipe(
 ).images[0]
 
 image = pipe("A picture of a sks dog in a bucket.", num_inference_steps=25, guidance_scale=7.5).images[0]
+# image = pipe("A picture of a sks dog swimming", num_inference_steps=25, guidance_scale=7.5).images[0]
 image.save("./vis/bucket-dog.png")
