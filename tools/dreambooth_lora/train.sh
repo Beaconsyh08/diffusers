@@ -1,10 +1,10 @@
 accelerate config default
-DATA_NAME="shiba"
+DATA_NAME="haomo_night"
 export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/stable-diffusion-v1-5"
 # export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/instruct-pix2pix"
 export INSTANCE_DIR="./data/train/finetune/$DATA_NAME"
-export OUTPUT_DIR="./res/finetune/dreambooth_lora/${DATA_NAME}_5"
-export CLASS_DIR="./data/train/finetune/dog_class"
+export OUTPUT_DIR="./res/finetune/dreambooth_lora/${DATA_NAME}_sks_2"
+export CLASS_DIR="./data/train/finetune/night_class"
 
 WANDB_DISABLE_SERVICE=true
 
@@ -12,7 +12,7 @@ accelerate launch ./examples/dreambooth/train_dreambooth_lora.py \
   --pretrained_model_name_or_path=$MODEL_NAME  \
   --instance_data_dir=$INSTANCE_DIR \
   --output_dir=$OUTPUT_DIR \
-  --instance_prompt="a photo of sks dog" \
+  --instance_prompt="a photo of sks night traffic scene" \
   --resolution=512 \
   --train_batch_size=1 \
   --gradient_accumulation_steps=1 \
@@ -24,7 +24,7 @@ accelerate launch ./examples/dreambooth/train_dreambooth_lora.py \
   --max_train_steps=1500 \
   --seed="0" \
   --class_data_dir=$CLASS_DIR \
-  --class_prompt="a photo of dog" \
+  --class_prompt="a photo of night traffic scene" \
 
   # --validation_prompt="A photo of sks dog in a bucket" \
   # --validation_epochs=50 \

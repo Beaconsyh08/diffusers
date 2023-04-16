@@ -1,7 +1,10 @@
+accelerate config default
+DATA_NAME="haomo_night"
 export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/stable-diffusion-v1-5"
-export OUTPUT_DIR="./res/finetune/lora"
-export HUB_MODEL_ID="pokemon-lora"
-export DATASET_NAME="./data/train/finetune/pokemon/data"
+export OUTPUT_DIR="./res/finetune/lora/$DATA_NAME"
+# export HUB_MODEL_ID="pokemon-lora"
+# export DATASET_NAME="./data/train/finetune/pokemon/data"
+export DATASET_NAME="./data/train/finetune/$DATA_NAME"
 # export DATASET_NAME="lambdalabs/pokemon-blip-captions"
 
 accelerate launch --mixed_precision="fp16"  ./examples/text_to_image/train_text_to_image_lora.py \
