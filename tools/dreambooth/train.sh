@@ -22,6 +22,7 @@ accelerate launch ./examples/dreambooth/train_dreambooth.py \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
   --num_class_images=200 \
-  --max_train_steps=3200
+  --max_train_steps=32000 \
+  --checkpointing_steps=10000
 
 #   --use_8bit_adam \

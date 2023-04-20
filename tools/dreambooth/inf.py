@@ -22,10 +22,12 @@ import torch
 import os
 
 prompts = ["a photo of sks night traffic scene", ]
+# prompts = ["a dog in a sks night", ]
+
 # prompts = ["a photo of a dog", "a photo of a dog", ]
 model_names = ["haomo_night_sks_200x",]
 model_dir = "./res/finetune/dreambooth" 
-n = 6
+n = 50
 
 for ind, model_name in enumerate(model_names):
     res_dir = "./vis/dreambooth/%s" % model_name
