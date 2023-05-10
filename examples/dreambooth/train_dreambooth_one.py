@@ -477,7 +477,7 @@ class DreamBoothDataset(Dataset):
 
         self.instance_images_path = list(Path(instance_data_root).iterdir())
         self.num_instance_images = len(self.instance_images_path)
-        self.instance_prompt = instance_prompt
+        self.instance_prompt_path = list(Path(instance_prompt).iterdir())
         self._length = self.num_instance_images
 
         if class_data_root is not None:
@@ -511,8 +511,13 @@ class DreamBoothDataset(Dataset):
         if not instance_image.mode == "RGB":
             instance_image = instance_image.convert("RGB")
         example["instance_images"] = self.image_transforms(instance_image)
+        
+        with open(self.instance_prompt_path[index % self.num_instance_images], "r") as input_prompt:
+            instance_prompt = ",".join(input_prompt.readlines())
+            # print(instance_prompt)
+        
         example["instance_prompt_ids"] = self.tokenizer(
-            self.instance_prompt,
+            instance_prompt,
             truncation=True,
             padding="max_length",
             max_length=self.tokenizer.model_max_length,
