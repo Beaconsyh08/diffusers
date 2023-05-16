@@ -23,11 +23,11 @@ import os
 import cv2
 import numpy as np  
 
-# prompts = ["a street filled with lots of traffic at night time with lights on and cars driving down the street and a building in the background", 
-#            "a street that covered by heavy snow, filled with lots of traffic and cars driving down the street and a building in the background, 4k",
-#            "a street filled with lots of traffic and cars driving down the street and a building in the background, 4k",
-#            "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, 4k",
-#            "a photo of a dog"]
+prompts = ["a street filled with lots of traffic at night time with lights on and cars driving down the street and a building in the background", 
+           "a street that covered by heavy snow, filled with lots of traffic and cars driving down the street and a building in the background, 4k",
+           "a street filled with lots of traffic and cars driving down the street and a building in the background, 4k",
+           "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, 4k",
+           "a photo of a dog"]
 
 # prompts = ["a street filled with lots of traffic at night time with lights on and cars driving down the street and a building in the background, in the style of haomo", 
 #            "a street that covered by heavy snow, filled with lots of traffic and cars driving down the street and a building in the background, in the style of haomo, 4k",
@@ -35,14 +35,7 @@ import numpy as np
 #            "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, in the style of haomo, 4k",
 #            "a photo of a dog, in the style of haomo"]
 
-# prompts = ["a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, 4k",]
-
-prompts = ["a photo of a dog, in the style of haomo",
-           "a street filled with lots of traffic and cars driving down the street and a building in the background, in the style of haomo, 4k",
-           "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, in the style of haomo, 4k",]
-
-model_names = ["haomo_5000_hmp"]
-# model_names = [ "haomo_5000"]
+model_names = ["SD-HM-V1.0"]
 
 # model_dir = "./res/finetune/dreambooth" 
 model_dir = "/mnt/ve_share/generation/models/online/diffusions/res/finetune/dreambooth"

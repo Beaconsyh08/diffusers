@@ -34,7 +34,7 @@ echo "$OUTPUT_DIR"
 
 accelerate config default
 export DATA_NAME="haomo"
-export MODEL_NAME="/mnt/ve_share/generation/models/online/diffusions/base/stable-diffusion-v1-5"
+export MODEL_NAME="/share/generation/models/online/diffusions/base/stable-diffusion-v1-5"
 # export INSTANCE_DIR="./data/train/finetune/$DATA_NAME"
 # export INSTANCE_DIR="/share/generation/data/train/diffusions/5000/imgs"
 # export OUTPUT_DIR="/share/generation/models/online/diffusions/res/finetune/dreambooth/${DATA_NAME}_5000_seg1"
@@ -64,4 +64,4 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
 #   --use_8bit_adam \
 
 
-#  ./tools/dreambooth/train_one_online.sh -i /mnt/ve_share/generation/data/train/diffusions/5000/imgs -p /mnt/ve_share/generation/data/train/diffusions/5000/pmps_seg_test1 -o /mnt/ve_share/generation/models/online/diffusions/res/finetune/dreambooth/haomo_5000_seg1_ttt
+#  ./tools/dreambooth/train_one_online.sh -i /share/generation/data/train/diffusions/5000/imgs -p /share/generation/data/train/diffusions/5000/pmps_seg_test1 -o /share/generation/models/online/diffusions/res/finetune/dreambooth/haomo_5000_seg1_ttt
