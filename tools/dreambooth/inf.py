@@ -43,7 +43,7 @@ n = 48
 combine = True
 
 for ind, model_name in enumerate(model_names):
-    res_dir = "./vis/dreambooth/%s" % model_name
+    res_dir = "/mnt/ve_share/generation/data/result/diffusions/vis/dreambooth/%s" % model_name
     os.makedirs(res_dir, exist_ok=True)
     model_id= "%s/%s" % (model_dir, model_name)
     pipe = DiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
