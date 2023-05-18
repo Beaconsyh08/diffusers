@@ -3,25 +3,27 @@ pip install -e ".[torch]"
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -a INSTANCE_DIR -b INSTANCE_PROMPT -c OUTPUT_DIR"
-   echo -e "\t-a Description of what is INSTANCE_DIR"
-   echo -e "\t-b Description of what is INSTANCE_PROMPT"
-   echo -e "\t-c Description of what is OUTPUT_DIR"
+   echo "Usage: $0 -i INSTANCE_DIR -p INSTANCE_PROMPT -o OUTPUT_DIR -t ITER"
+   echo -e "\t-i Description of what is INSTANCE_DIR"
+   echo -e "\t-p Description of what is INSTANCE_PROMPT"
+   echo -e "\t-o Description of what is OUTPUT_DIR"
+   echo -e "\t-t Description of what is ITER"
    exit 1 # Exit script after printing help
 }
 
-while getopts "i:p:o:" opt
+while getopts "i:p:o:t:" opt
 do
    case "$opt" in
       i ) INSTANCE_DIR="$OPTARG" ;;
       p ) INSTANCE_PROMPT="$OPTARG" ;;
       o ) OUTPUT_DIR="$OPTARG" ;;
+      t ) ITER="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 
 # Print helpFunction in case parameters are empty
-if [ -z "$INSTANCE_DIR" ] || [ -z "$INSTANCE_PROMPT" ] || [ -z "$OUTPUT_DIR" ]
+if [ -z "$INSTANCE_DIR" ] || [ -z "$INSTANCE_PROMPT" ] || [ -z "$OUTPUT_DIR" ] || [ -z "$ITER" ]
 then
    echo "Some or all of the parameters are empty";
    helpFunction
@@ -31,6 +33,7 @@ fi
 echo "$INSTANCE_DIR"
 echo "$INSTANCE_PROMPT"
 echo "$OUTPUT_DIR"
+echo "$ITER"
 
 accelerate config default
 export DATA_NAME="haomo"
@@ -54,8 +57,8 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
   --learning_rate=2e-6 \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
-  --max_train_steps=6250 \
-  --checkpointing_steps=3125
+  --max_train_steps=$ITER \
+  --checkpointing_steps=12500
 
 # 1 for 160  max_train_steps * train_batch_size * gpu
   # --with_prior_preservation --prior_loss_weight=1.0 \

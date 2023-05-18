@@ -7,15 +7,18 @@ from datetime import datetime, time
 
 def load_and_dowmload_imgs(json_path, save_dir, mode):
     # try:
-    with open(json_path.strip(),'r') as f:
-        data_info = json.load(f)
+
     
     if mode == "bundle":
+        with open(json_path.strip(),'r') as f:
+            data_info = json.load(f)
         imgUrl = '/' + data_info['imgUrl']
         save_path = os.path.join(save_dir, os.path.basename(imgUrl))
         os.system('cp {} {}'.format(imgUrl, save_path))
         
     elif mode == "clip":
+        with open(json_path.strip(),'r') as f:
+            data_info = json.load(f)
         data_os = data_info['camera']
         for data_o in data_os:
             if data_o["name"] == "front_middle_camera":
@@ -26,6 +29,8 @@ def load_and_dowmload_imgs(json_path, save_dir, mode):
                 os.system('cp {} {}'.format(imgUrl, save_path))
                 break
     elif mode == "whole_clip":
+        with open(json_path.strip(),'r') as f:
+            data_info = json.load(f)
         time_stamp = json_path.split("_")[-1].split(".")[0]
         date_time = datetime.fromtimestamp(int(str(time_stamp)[:10]))
         timestamp_date = date_time.date()
@@ -57,12 +62,16 @@ def load_and_dowmload_imgs(json_path, save_dir, mode):
                 if lidar_name in ["center_128_lidar_scan_data", "left_M1_lidar_scan_data", "right_M1_lidar_scan_data"]:
                     lidar_save_path = "%s/%s.pcd" % (save_folder_path, lidar_name)
                     os.system('cp {} {}'.format(lidar_path, lidar_save_path))
+                    
+    elif mode == "pure":
+        save_path = os.path.join(save_dir, os.path.basename(json_path))
+        os.system('cp {} {}'.format(json_path, save_path))
             
                 
 
-jsontxt_path = '/tmp/json_paths.txt'
+jsontxt_path = '/mnt/ve_share/generation/lsu_query/dusk.txt'
 # jsontxt_folder = "/share/2d-od/lei/aiday_inf/demo2"
-save_dir = '/mnt/share_disk/syh/data/train/diffusions/origin/imgs'  
+save_dir = '/mnt/share_disk/syh/data/train/diffusions/lsu/imgs/dusk'  
 # save_dir = '/mnt/ve_share/yayun'
 
 
@@ -83,7 +92,7 @@ with open(jsontxt_path,'r') as f:
     jsons = f.readlines()
 
 
-jsons = tqdm(jsons)
+jsons = tqdm(jsons[:1000])
 
 count = 0
 mode = "bundle"  # [bundle | clip | whole_clip]

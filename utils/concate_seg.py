@@ -122,9 +122,12 @@ my_mask_dict_1 = {
     60:"Trailer",
     61:"Truck",
 }
-# Traffic_Light: 48, Bicycle: 52, bus: 54, car: 55, caravan: 56, motorcycle: 57, trailer: 60, truck: 61
+
+number_filter = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,23,24,25,26,27,28,29,30,31]
 filter_lst = list(my_mask_dict_1.keys())
 seg_dic = dict()
+
+# ===============================================================================
 for _, _, files in os.walk(DICT_DIR):
     for name in tqdm(files):
         dict_name = DICT_DIR + '/' + name
@@ -134,8 +137,42 @@ for _, _, files in os.walk(DICT_DIR):
             filter_dic = {k: v for k, v in dic.items() if v in filter_lst}
             item_dic = {k: my_mask_dict_1[v] for k, v in filter_dic.items()}
             item_counter = (Counter(item_dic.values()))
-            item_des = ["%d %s" % (v, k) for k, v in item_counter.items()]
+            # with number
+            # item_des = ["%d %s" % (v, k) for k, v in item_counter.items()]
+            # all without number
+            item_des = ["%s" % k for k, v in item_counter.items()]
+
             seg_dic[stem_name] = ", ".join(item_des)
+# ===============================================================================
+
+# ===============================================================================
+# some number
+# for _, _, files in os.walk(DICT_DIR):
+#     for name in tqdm(files):
+#         dict_name = DICT_DIR + '/' + name
+#         stem_name = name.split(".")[0]
+#         with open(dict_name, 'rb') as f:
+#             dic = pickle.load(f)
+#             dic_1 = {k: v for k, v in dic.items() if v in number_filter}
+#             dic_2 = {k: v for k, v in dic.items() if v not in number_filter}
+            
+#             filter_dic_1 = {k: v for k, v in dic_1.items() if v in filter_lst}
+#             filter_dic_2 = {k: v for k, v in dic_2.items() if v in filter_lst}
+            
+#             item_dic_1 = {k: my_mask_dict_1[v] for k, v in filter_dic_1.items()}
+#             item_dic_2 = {k: my_mask_dict_1[v] for k, v in filter_dic_2.items()}
+            
+#             item_counter_1 = (Counter(item_dic_1.values()))
+#             item_counter_2 = (Counter(item_dic_2.values()))
+            
+#             # # with number
+#             item_des_2 = ["%d %s" % (v, k) for k, v in item_counter_2.items()]
+#             # # all without number
+#             item_des_1 = ["%s" % k for k, v in item_counter_1.items()]
+
+#             seg_dic[stem_name] = ", ".join(item_des_2 + item_des_1)
+# ===============================================================================
+            
 
 pmp_dic = dict()
 for _, _, files in os.walk(PMPS_DIR):
@@ -145,6 +182,7 @@ for _, _, files in os.walk(PMPS_DIR):
         with open(file_name, 'r') as f:
             blip_desc = f.readline()
             pmp_dic[stem_name] = blip_desc
+
 
 merge_dic = defaultdict(list)
 for d in (pmp_dic, seg_dic): # you can list as many input dicts as you want here
@@ -157,3 +195,4 @@ for k, v in tqdm(merge_dic.items()):
     save_path = "%s/%s.txt" % (RES_DIR, k)
     with open(save_path, "w") as output_file:
         output_file.writelines(v)
+        

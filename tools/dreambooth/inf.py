@@ -17,43 +17,52 @@
 # pipeline.save_pretrained("dreambooth-pipeline")
 
 
-from diffusers import DiffusionPipeline
+from diffusers import DiffusionPipeline, StableDiffusionPipeline
 import torch
 import os
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 import cv2
 import numpy as np  
+from tqdm import tqdm
 
-prompts = ["a street filled with lots of traffic at night time with lights on and cars driving down the street and a building in the background", 
-           "a street that covered by heavy snow, filled with lots of traffic and cars driving down the street and a building in the background, 4k",
-           "a street filled with lots of traffic and cars driving down the street and a building in the background, 4k",
-           "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, 4k",
-           "a photo of a dog"]
+# prompts = ["a street filled with lots of traffic at night time with lights on and cars driving down the street and a building in the background", 
+#            "a street that covered by heavy snow, filled with lots of traffic and cars driving down the street and a building in the background, 4k",
+#            "a street filled with lots of traffic and cars driving down the street and a building in the background, 4k",
+#            "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, 4k",
+#            "a photo of a dog",
+#            "a group of people riding on the back of three wheeled vehicles down a street next to a traffic light",
+#            "a roundabout filled with lots of cars and trucks in a foggy day, 4k",]
+prompts = ["a city street with cars driving down it and tall buildings in the background on a foggy day with a few cars"]
 
-# prompts = ["a street filled with lots of traffic at night time with lights on and cars driving down the street and a building in the background, in the style of haomo", 
-#            "a street that covered by heavy snow, filled with lots of traffic and cars driving down the street and a building in the background, in the style of haomo, 4k",
-#            "a street filled with lots of traffic and cars driving down the street and a building in the background, in the style of haomo, 4k",
-#            "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, in the style of haomo, 4k",
-#            "a photo of a dog, in the style of haomo"]
 
-model_names = ["SD-HM-V1.0"]
+model_names = ["SD-Base", "SD-HM-V0.0", "SD-HM-V0.1", "SD-HM-V1.0", "SD-HM-V1.1", "SD-HM-V1.2"]
+# model_names = []
 
 # model_dir = "./res/finetune/dreambooth" 
 model_dir = "/mnt/ve_share/generation/models/online/diffusions/res/finetune/dreambooth"
-n = 48
-combine = True
+n = 20
+combine = False
 
 for ind, model_name in enumerate(model_names):
     res_dir = "/mnt/ve_share/generation/data/result/diffusions/vis/dreambooth/%s" % model_name
     os.makedirs(res_dir, exist_ok=True)
-    model_id= "%s/%s" % (model_dir, model_name)
-    pipe = DiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
+    
+    if model_name == "SD-Base":
+        model_id = "/mnt/ve_share/generation/models/online/diffusions/base/stable-diffusion-v1-5"
+        pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
+    
+    else:
+        model_id= "%s/%s" % (model_dir, model_name)
+        pipe = DiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
     
     for prompt in prompts:
         img_lst = []
+        if model_name == "SD-HM-V0.1":
+            prompt += ", in the style of haomo"
         res_dir_p = "%s/%s" % (res_dir, "_".join(prompt.split(" ")))
         os.makedirs(res_dir_p, exist_ok=True)
         
-        for i in range(n):
+        for i in tqdm(range(n)):
             image = pipe(prompt, num_inference_steps=50, guidance_scale=7.5).images[0]
             res_id = "%s/%d.png" % (res_dir_p, i)
             image.save(res_id)

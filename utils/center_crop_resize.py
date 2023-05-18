@@ -30,10 +30,11 @@ def center_crop_resize(image_path, output_dir):
     image.save(output_path)
 
 if __name__ == '__main__':
-    input_dir = '/mnt/share_disk/syh/data/train/diffusions/origin/imgs'
-    output_dir = '/mnt/share_disk/syh/data/train/diffusions/origin/512'
+    input_dir = '/mnt/ve_share/generation/data/train/diffusions/lsu_combine/imgs'
+    output_dir = '/mnt/ve_share/generation/data/train/diffusions/lsu_combine/512'
+    os.makedirs(output_dir, exist_ok=True)
 
-    image_paths = random.sample([os.path.join(input_dir, filename) for filename in os.listdir(input_dir)], k=100000)
+    image_paths = random.sample([os.path.join(input_dir, filename) for filename in os.listdir(input_dir)], k=7768)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         print(len(image_paths))
         future_results = [executor.submit(center_crop_resize, image_path, output_dir) for image_path in tqdm(image_paths)]
