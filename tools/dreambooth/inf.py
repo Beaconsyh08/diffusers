@@ -25,23 +25,25 @@ import cv2
 import numpy as np  
 from tqdm import tqdm
 
-prompts = ["a street filled with lots of traffic at night time with lights on and cars driving down the street and a building in the background", 
-           "a street that covered by heavy snow, filled with lots of traffic and cars driving down the street and a building in the background, 4k",
-           "a street filled with lots of traffic and cars driving down the street and a building in the background, 4k",
-           "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, 4k",
-           "a photo of a dog",
-           "a group of people riding on the back of three wheeled vehicles down a street next to a traffic light",
-           "a roundabout filled with lots of cars and trucks in a foggy day, 4k",
-           "a street filled with lots of traffic and cars driving down the street, 4k",
-           "a city street with cars driving down it and tall buildings in the background on a foggy day with a few cars",
-           "a white bus driving down a street next to a white car and a white car with a yellow license plate",
-           "two cars collisions in the street",
-           "group of people crossing the road",
-           "a street covered by heavy snow, filled with lots of traffic and cars driving down the street and The Eiffel Tower in the background, 4k"]
+# prompts = ["a street filled with lots of traffic at night time with lights on and cars driving down the street and a building in the background", 
+#            "a street that covered by heavy snow, filled with lots of traffic and cars driving down the street and a building in the background, 4k",
+#            "a street filled with lots of traffic and cars driving down the street and a building in the background, 4k",
+#            "a street filled with lots of traffic and cars driving down the street and a building in the background, rainy, 4k",
+#            "a photo of a dog",
+#            "a group of people riding on the back of three wheeled vehicles down a street next to a traffic light",
+#            "a roundabout filled with lots of cars and trucks in a foggy day, 4k",
+#            "a street filled with lots of traffic and cars driving down the street, 4k",
+#            "a city street with cars driving down it and tall buildings in the background on a foggy day with a few cars",
+#            "a white bus driving down a street next to a white car and a white car with a yellow license plate",
+#            "two cars collisions in the street",
+#            "group of people crossing the road",
+#            "a street covered by heavy snow, filled with lots of traffic and cars driving down the street and The Eiffel Tower in the background, 4k"]
+prompts = ["nighttime, 4k"]
 
 
-model_names = ["SD-Base", "SD-HM-V0.0", "SD-HM-V0.1", "SD-HM-V1.0", "SD-HM-V1.1", "SD-HM-V1.2", "SD-HM-V2.0", "SD-HM-V3.0", "SD-HM-V3.0.1", "SD-HM-V3.1", "SD-HM-V3.1.1", "SD-HM-V4.0", "SD-HM-V4.0.1", "SD-HM-V4.1", "SD-HM-V4.1.1"]
-# model_names = []
+
+# model_names = ["SD-Base", "SD-HM-V0.0", "SD-HM-V0.1", "SD-HM-V1.0", "SD-HM-V1.1", "SD-HM-V1.2", "SD-HM-V2.0", "SD-HM-V3.0", "SD-HM-V3.0.1", "SD-HM-V3.1", "SD-HM-V3.1.1", "SD-HM-V4.0", "SD-HM-V4.0.1", "SD-HM-V4.1", "SD-HM-V4.1.1"]
+model_names = ["SD-HM-V0.4.0"]
 
 # model_dir = "./res/finetune/dreambooth" 
 model_dir = "/mnt/ve_share/generation/models/online/diffusions/res/finetune/dreambooth"
@@ -64,7 +66,7 @@ for ind, model_name in enumerate(model_names):
     for prompt in prompts:
         print(prompt)
         img_lst = []
-        if model_name == "SD-HM-V0.1":
+        if model_name == "SD-HM-V0.1.0":
             prompt += ", in the style of haomo"
         res_dir_p = "%s/%s" % (res_dir, "_".join(prompt.split(" ")))
         os.makedirs(res_dir_p, exist_ok=True)
