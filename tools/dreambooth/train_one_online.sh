@@ -3,27 +3,29 @@ pip install -e ".[torch]"
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -i INSTANCE_DIR -p INSTANCE_PROMPT -o OUTPUT_DIR -t ITER"
+   echo "Usage: $0 -i INSTANCE_DIR -p INSTANCE_PROMPT -o OUTPUT_DIR -t ITER -b BATCH_SIZE"
    echo -e "\t-i Description of what is INSTANCE_DIR"
    echo -e "\t-p Description of what is INSTANCE_PROMPT"
    echo -e "\t-o Description of what is OUTPUT_DIR"
    echo -e "\t-t Description of what is ITER"
+   echo -e "\t-b Description of what is BATCH_SIZE"
    exit 1 # Exit script after printing help
 }
 
-while getopts "i:p:o:t:" opt
+while getopts "i:p:o:t:b:" opt
 do
    case "$opt" in
       i ) INSTANCE_DIR="$OPTARG" ;;
       p ) INSTANCE_PROMPT="$OPTARG" ;;
       o ) OUTPUT_DIR="$OPTARG" ;;
       t ) ITER="$OPTARG" ;;
+      b ) BATCH_SIZE="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 
 # Print helpFunction in case parameters are empty
-if [ -z "$INSTANCE_DIR" ] || [ -z "$INSTANCE_PROMPT" ] || [ -z "$OUTPUT_DIR" ] || [ -z "$ITER" ]
+if [ -z "$INSTANCE_DIR" ] || [ -z "$INSTANCE_PROMPT" ] || [ -z "$OUTPUT_DIR" ] || [ -z "$ITER" ] || [ -z "$BATCH_SIZE" ]
 then
    echo "Some or all of the parameters are empty";
    helpFunction
@@ -34,6 +36,7 @@ echo "$INSTANCE_DIR"
 echo "$INSTANCE_PROMPT"
 echo "$OUTPUT_DIR"
 echo "$ITER"
+echo "$BATCH_SIZE"
 
 accelerate config default
 export DATA_NAME="haomo"
@@ -52,13 +55,13 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
   --output_dir=$OUTPUT_DIR \
   --instance_prompt=$INSTANCE_PROMPT \
   --resolution=512 \
-  --train_batch_size=16 \
+  --train_batch_size=$BATCH_SIZE \
   --gradient_checkpointing \
   --learning_rate=2e-6 \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
   --max_train_steps=$ITER \
-  --checkpointing_steps=12500
+  --checkpointing_steps=50000
 
 # 1 for 160  max_train_steps * train_batch_size * gpu
   # --with_prior_preservation --prior_loss_weight=1.0 \
@@ -68,3 +71,8 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
 
 
 #  ./tools/dreambooth/train_one_online.sh -i /share/generation/data/train/diffusions/5000/imgs -p /share/generation/data/train/diffusions/5000/pmps_seg_test1 -o /share/generation/models/online/diffusions/res/finetune/dreambooth/haomo_5000_seg1_ttt
+pip install safetensors
+python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
+cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors
+
+echo "done"
