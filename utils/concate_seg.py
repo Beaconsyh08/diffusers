@@ -3,9 +3,9 @@ import pickle
 from tqdm import tqdm
 from collections import Counter, defaultdict
 
-DICT_DIR = "/mnt/ve_share/generation/data/train/diffusions/5000/dict"
-PMPS_DIR = "/mnt/ve_share/generation/data/train/diffusions/5000/pmps"
-RES_DIR = "/mnt/ve_share/generation/data/train/diffusions/5000/pmps_seg_test1"
+DICT_DIR = "/mnt/ve_share/generation/data/train/diffusions/comb_ins/dict"
+PMPS_DIR = "/mnt/ve_share/generation/data/train/diffusions/comb_ins/pmps"
+RES_DIR = "/mnt/ve_share/generation/data/train/diffusions/comb_ins/pmps_seg_some"
 
 os.makedirs(RES_DIR, exist_ok=True)
 
@@ -127,50 +127,50 @@ number_filter = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,23,24,25,26,27,28,29
 filter_lst = list(my_mask_dict_1.keys())
 seg_dic = dict()
 
-# ===============================================================================
-for _, _, files in os.walk(DICT_DIR):
-    for name in tqdm(files):
-        dict_name = DICT_DIR + '/' + name
-        stem_name = name.split(".")[0]
-        with open(dict_name, 'rb') as f:
-            dic = pickle.load(f)
-            filter_dic = {k: v for k, v in dic.items() if v in filter_lst}
-            item_dic = {k: my_mask_dict_1[v] for k, v in filter_dic.items()}
-            item_counter = (Counter(item_dic.values()))
-            # with number
-            # item_des = ["%d %s" % (v, k) for k, v in item_counter.items()]
-            # all without number
-            item_des = ["%s" % k for k, v in item_counter.items()]
-
-            seg_dic[stem_name] = ", ".join(item_des)
-# ===============================================================================
-
-# ===============================================================================
-# some number
+# # ===============================================================================
 # for _, _, files in os.walk(DICT_DIR):
 #     for name in tqdm(files):
 #         dict_name = DICT_DIR + '/' + name
 #         stem_name = name.split(".")[0]
 #         with open(dict_name, 'rb') as f:
 #             dic = pickle.load(f)
-#             dic_1 = {k: v for k, v in dic.items() if v in number_filter}
-#             dic_2 = {k: v for k, v in dic.items() if v not in number_filter}
-            
-#             filter_dic_1 = {k: v for k, v in dic_1.items() if v in filter_lst}
-#             filter_dic_2 = {k: v for k, v in dic_2.items() if v in filter_lst}
-            
-#             item_dic_1 = {k: my_mask_dict_1[v] for k, v in filter_dic_1.items()}
-#             item_dic_2 = {k: my_mask_dict_1[v] for k, v in filter_dic_2.items()}
-            
-#             item_counter_1 = (Counter(item_dic_1.values()))
-#             item_counter_2 = (Counter(item_dic_2.values()))
-            
-#             # # with number
-#             item_des_2 = ["%d %s" % (v, k) for k, v in item_counter_2.items()]
-#             # # all without number
-#             item_des_1 = ["%s" % k for k, v in item_counter_1.items()]
+#             filter_dic = {k: v for k, v in dic.items() if v in filter_lst}
+#             item_dic = {k: my_mask_dict_1[v] for k, v in filter_dic.items()}
+#             item_counter = (Counter(item_dic.values()))
+#             # with number
+#             # item_des = ["%d %s" % (v, k) for k, v in item_counter.items()]
+#             # all without number
+#             item_des = ["%s" % k for k, v in item_counter.items()]
 
-#             seg_dic[stem_name] = ", ".join(item_des_2 + item_des_1)
+#             seg_dic[stem_name] = ", ".join(item_des)
+# # ===============================================================================
+
+# ===============================================================================
+# some number
+for _, _, files in os.walk(DICT_DIR):
+    for name in tqdm(files):
+        dict_name = DICT_DIR + '/' + name
+        stem_name = name.split(".")[0]
+        with open(dict_name, 'rb') as f:
+            dic = pickle.load(f)
+            dic_1 = {k: v for k, v in dic.items() if v in number_filter}
+            dic_2 = {k: v for k, v in dic.items() if v not in number_filter}
+            
+            filter_dic_1 = {k: v for k, v in dic_1.items() if v in filter_lst}
+            filter_dic_2 = {k: v for k, v in dic_2.items() if v in filter_lst}
+            
+            item_dic_1 = {k: my_mask_dict_1[v] for k, v in filter_dic_1.items()}
+            item_dic_2 = {k: my_mask_dict_1[v] for k, v in filter_dic_2.items()}
+            
+            item_counter_1 = (Counter(item_dic_1.values()))
+            item_counter_2 = (Counter(item_dic_2.values()))
+            
+            # # with number
+            item_des_2 = ["%d %s" % (v, k) for k, v in item_counter_2.items()]
+            # # all without number
+            item_des_1 = ["%s" % k for k, v in item_counter_1.items()]
+
+            seg_dic[stem_name] = ", ".join(item_des_2 + item_des_1)
 # ===============================================================================
             
 

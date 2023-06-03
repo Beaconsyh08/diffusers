@@ -148,6 +148,16 @@ for _, _, files in os.walk(PMPS_DIR):
         stem_name = name.split(".")[0]
         coor_name = stem_name.split("-")[-1]
         name_dic[coor_name] = stem_name
+
+DICT_DIR = "/mnt/ve_share/generation/data/train/diffusions/lsu/lsu_combine/dict"
+NEW_DIR = "/mnt/ve_share/generation/data/train/diffusions/lsu"
+
+        
+for short_name in list(name_dic.keys()):
+    full_name = name_dic[short_name]
+    # os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_CLS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_CLS, full_name)))
+    os.system('cp {} {}'.format("%s/%s.pkl" % (DICT_DIR, short_name), "%s/dict/%s.pkl" % (NEW_DIR_CLS, full_name)))
         
 # ===============================================================================
 for _, _, files in os.walk(DICT_DIR):
@@ -172,30 +182,28 @@ sorted_seg_dic_class = dict(sorted(seg_dic_class.items(), key=lambda item: item[
 
 for short_name in list(sorted_seg_dic_instance.keys())[:10000]:
     full_name = name_dic[short_name]
-    os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_INS, full_name)))
-    os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_INS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_INS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_INS, full_name)))
+    os.system('cp {} {}'.format("%s/%s.pkl" % (DICT_DIR, short_name), "%s/dict/%s.pkl" % (NEW_DIR_INS, full_name)))
     
 for short_name in list(sorted_seg_dic_instance.keys())[-10000:]:
     full_name = name_dic[short_name]
-    os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_INS, full_name)))
-    os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_INS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_INS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_INS, full_name)))
+    os.system('cp {} {}'.format("%s/%s.pkl" % (DICT_DIR, short_name), "%s/dict/%s.pkl" % (NEW_DIR_INS, full_name)))
     
 for short_name in list(sorted_seg_dic_class.keys())[:10000]:
     full_name = name_dic[short_name]
-    os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_CLS, full_name)))
-    os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_CLS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_CLS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_CLS, full_name)))
+    os.system('cp {} {}'.format("%s/%s.pkl" % (DICT_DIR, short_name), "%s/dict/%s.pkl" % (NEW_DIR_CLS, full_name)))
     
 for short_name in list(sorted_seg_dic_class.keys())[-10000:]:
     full_name = name_dic[short_name]
-    os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_CLS, full_name)))
-    os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_CLS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.png" % (IMAGE_DIR, full_name), "%s/imgs/%s.png" % (NEW_DIR_CLS, full_name)))
+    # os.system('cp {} {}'.format("%s/%s.txt" % (PMPS_DIR, full_name), "%s/pmps/%s.txt" % (NEW_DIR_CLS, full_name)))
+    os.system('cp {} {}'.format("%s/%s.pkl" % (DICT_DIR, short_name), "%s/dict/%s.pkl" % (NEW_DIR_CLS, full_name)))
     
-
-
-
-
-
-
 
 # merge_dic = defaultdict(list)
 # for d in (pmp_dic, seg_dic): # you can list as many input dicts as you want here
