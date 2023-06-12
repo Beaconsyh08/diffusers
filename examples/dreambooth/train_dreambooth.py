@@ -23,6 +23,7 @@ import os
 import warnings
 from pathlib import Path
 
+import accelerate
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -545,7 +546,15 @@ def parse_args(input_args=None):
         default=None,
         help="The optional `class_label` conditioning to pass to the unet, available values are `timesteps`.",
     )
-
+    parser.add_argument(
+        "--diff_prompt",
+        action="store_true",
+        default=False,
+        help=(
+            "Diff Prompts for Diff Images"
+        ),
+    )
+    
     if input_args is not None:
         args = parser.parse_args(input_args)
     else:
@@ -633,7 +642,7 @@ class DreamBoothDataset(Dataset):
 
     def __len__(self):
         return self._length
-
+    
     def __getitem__(self, index):
         example = {}
         instance_image = Image.open(self.instance_images_path[index % self.num_instance_images])
@@ -670,7 +679,7 @@ class DreamBoothDataset(Dataset):
                 example["class_attention_mask"] = class_text_inputs.attention_mask
 
         return example
-
+    
 
 def collate_fn(examples, with_prior_preservation=False):
     has_attention_mask = "instance_attention_mask" in examples[0]
