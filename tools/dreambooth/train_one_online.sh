@@ -51,7 +51,6 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
   --pretrained_model_name_or_path=$MODEL_NAME  \
   --train_text_encoder \
   --instance_data_dir=$INSTANCE_DIR \
-  --class_data_dir=$CLASS_DIR \
   --output_dir=$OUTPUT_DIR \
   --instance_prompt=$INSTANCE_PROMPT \
   --resolution=512 \
@@ -61,7 +60,7 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
   --max_train_steps=$ITER \
-  --checkpointing_steps=12500
+  --checkpointing_steps=50000
 
 # 1 for 160  max_train_steps * train_batch_size * gpu
   # --with_prior_preservation --prior_loss_weight=1.0 \
@@ -71,3 +70,8 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
 
 
 #  ./tools/dreambooth/train_one_online.sh -i /share/generation/data/train/diffusions/5000/imgs -p /share/generation/data/train/diffusions/5000/pmps_seg_test1 -o /share/generation/models/online/diffusions/res/finetune/dreambooth/haomo_5000_seg1_ttt
+pip install safetensors
+python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
+cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors
+
+echo "done"

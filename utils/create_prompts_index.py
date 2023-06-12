@@ -45,9 +45,11 @@ def save_json(data, output_file_path):
         json.dump(data, file, indent=4)
 
 # Example usage
-txt_folder_path = '/mnt/ve_share/generation/data/train/diffusions/comb_cls/pmps'
-png_folder_path = '/mnt/ve_share/generation/data/train/diffusions/comb_cls/imgs'
-output_file_path = '/mnt/ve_share/generation/data/train/diffusions/comb_cls/index.json'
+FOLDER = "all_snow"
+txt_folder_path = '/mnt/ve_share/generation/data/train/GAN/%s/pmps' % FOLDER
+png_folder_path = '/mnt/ve_share/generation/data/train/GAN/%s/imgs' % FOLDER
+output_file_path = '/mnt/ve_share/generation/data/train/GAN/%s/index.json' % FOLDER
 
 processed_data = process_files(txt_folder_path, png_folder_path)
 save_json(processed_data, output_file_path)
+print(output_file_path)

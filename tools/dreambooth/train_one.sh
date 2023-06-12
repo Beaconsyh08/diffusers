@@ -1,11 +1,10 @@
 accelerate config default
-DATA_NAME="haomo"
-export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/stable-diffusion-v1-5"
+export MODEL_NAME="/mnt/ve_share/generation/models/online/diffusions/res/finetune/dreambooth/SD-HM-V0.4.0"
 # export INSTANCE_DIR="./data/train/finetune/$DATA_NAME"
-export INSTANCE_DIR="/mnt/ve_share/generation/data/train/diffusions/5000/imgs"
-export OUTPUT_DIR="./res/finetune/dreambooth/${DATA_NAME}_5000"
+export INSTANCE_DIR="/mnt/ve_share/generation/data/train/GAN/all_snow/imgs"
+export OUTPUT_DIR="/mnt/ve_share/generation/models/online/diffusions/res/finetune/dreambooth/SD-HM-V0.4.0.snow.4"
 # export CLASS_DIR="./data/train/finetune/night_class"
-export INSTANCE_PROMPT="/mnt/ve_share/generation/data/train/diffusions/5000/pmps"
+export INSTANCE_PROMPT="/mnt/ve_share/generation/data/train/GAN/all_snow/pmps"
 
 accelerate launch ./examples/dreambooth/train_dreambooth_one.py \
   --pretrained_model_name_or_path=$MODEL_NAME  \
@@ -15,17 +14,16 @@ accelerate launch ./examples/dreambooth/train_dreambooth_one.py \
   --output_dir=$OUTPUT_DIR \
   --instance_prompt=$INSTANCE_PROMPT \
   --resolution=512 \
-  --train_batch_size=10 \
+  --train_batch_size=16 \
   --gradient_checkpointing \
   --learning_rate=2e-6 \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
-  --num_class_images=200 \
-  --max_train_steps=80000 \
+  --max_train_steps=64 \
   --checkpointing_steps=10000
+  
+pip install safetensors
+python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
+cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors
 
 # 200 for 32000  max_train_steps * train_batch_size
-  # --with_prior_preservation --prior_loss_weight=1.0 \
-
-  # --class_prompt="a photo of night traffic scene" \
-#   --use_8bit_adam \
