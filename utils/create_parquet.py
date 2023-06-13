@@ -5,10 +5,11 @@ from tqdm import tqdm
 
 P2P_PATH = "/mnt/share_disk/syh/data/prompt_to_prompt/index.txt"
 MODE = "replace_blend_reweight"
-SCENE = "snowy"
+SCENE = "rainy"
 PARA = "0.80_0.80_2.00"
 SIZE = 1000
-PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%s_%d" % (MODE, SCENE, PARA, SIZE)
+STREET = False
+PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%s_%d" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)
 PARQUET_PATH = "%s/p.parquet" % PARQUET_PATH
 
@@ -28,16 +29,29 @@ for path in tqdm(paths):
     parameter = path[-2]
     prompt = path[-1]
     if mode == MODE and scene == SCENE and parameter == PARA:
-        # print(mode, scene, id, parameter)
+        if STREET:
+            if SCENE == "night":
+                if "at_daytime" in prompt or "at_nighttime" in prompt:
+                    pass
+                else:
+                    continue
+        else:
+            if SCENE == "night":
+                if "at_daytime" in prompt or "at_nighttime" in prompt:
+                    continue
+                else:
+                    pass
+        
         if scene[:-1] in prompt:
             edited_image.append(path)
         else:
             input_image.append(path)
 
+# print(edited_image[:10])
 edited_image = sorted(edited_image, key=lambda x: x[-3])
 input_image = sorted(input_image, key=lambda x: x[-3])
 
-assert len(edited_image) == len(input_image)
+assert len(edited_image) == len(input_image), print(len(edited_image), len(input_image))
 
 sampled_items = random.sample(list(zip(input_image, edited_image)), SIZE)
 
