@@ -4,11 +4,11 @@ import os
 from tqdm import tqdm
 
 P2P_PATH = "/mnt/share_disk/syh/data/prompt_to_prompt/index.txt"
-MODE = "refine_blend_reweight"
+MODE = "replace_blend_reweight"
 SCENE = "snowy"
 PARA = "0.80_0.80_2.00"
 SIZE = 1000
-PARQUET_PATH = "/mnt/share_disk/syh/data/prompt_to_prompt/parquet/%s_%s_%s_%d" % (MODE, SCENE, PARA, SIZE)
+PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%s_%d" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)
 PARQUET_PATH = "%s/p.parquet" % PARQUET_PATH
 
@@ -43,6 +43,9 @@ sampled_items = random.sample(list(zip(input_image, edited_image)), SIZE)
 
 # Unpack the sampled items into separate lists
 input_image, edited_image = zip(*sampled_items)
+input_image = ["/".join(_) for _ in input_image]
+edited_image = ["/".join(_) for _ in edited_image]
+
 instruction = ["make it %s" % SCENE for _ in range(SIZE)]
 assert len(edited_image) == len(input_image) == len(instruction)
 
@@ -52,11 +55,11 @@ print(edited_image[:10])
 print(instruction[:10])
 
 
-# # Create a DataFrame with your data
+# Create a DataFrame with your data
 data = {
     'input_image': input_image,
-    'instruction': instruction,
-    'edited_image': edited_image
+    'edit_prompt': instruction,
+    'edited_image': edited_image,
 }
 
 df = pd.DataFrame(data)
