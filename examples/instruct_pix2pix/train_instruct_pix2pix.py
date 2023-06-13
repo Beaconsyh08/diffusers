@@ -462,7 +462,9 @@ def main():
             in_channels, out_channels, unet.conv_in.kernel_size, unet.conv_in.stride, unet.conv_in.padding
         )
         new_conv_in.weight.zero_()
-        new_conv_in.weight[:, :4, :, :].copy_(unet.conv_in.weight)
+        # size 4 will cause error
+        # new_conv_in.weight[:, :4, :, :].copy_(unet.conv_in.weight)
+        new_conv_in.weight[:, :8, :, :].copy_(unet.conv_in.weight)
         unet.conv_in = new_conv_in
 
     # Freeze vae and text_encoder

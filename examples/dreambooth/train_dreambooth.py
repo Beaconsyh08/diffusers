@@ -546,14 +546,6 @@ def parse_args(input_args=None):
         default=None,
         help="The optional `class_label` conditioning to pass to the unet, available values are `timesteps`.",
     )
-    parser.add_argument(
-        "--diff_prompt",
-        action="store_true",
-        default=False,
-        help=(
-            "Diff Prompts for Diff Images"
-        ),
-    )
     
     if input_args is not None:
         args = parser.parse_args(input_args)
