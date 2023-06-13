@@ -35,7 +35,7 @@ echo "$OUTPUT_DIR"
 echo "$ITER"
 echo "$BATCH_SIZE"
 
-export MODEL_NAME="/mnt/ve_share/generation/models/online/diffusions/base/instruct-pix2pix"
+export MODEL_NAME="/share/generation/models/online/diffusions/base/instruct-pix2pix"
 # export DATASET_ID="/mnt/ve_share/generation/data/train/diffusions/parquet/instructpix2pix-1000-samples"
 # export OUTPUT_DIR="/mnt/ve_share/generation/models/online/diffusions/res/instruct-pix2pix-test"
 
