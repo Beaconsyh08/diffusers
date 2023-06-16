@@ -70,8 +70,8 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth.py \
 
 
 #  ./tools/dreambooth/train_one_online.sh -i /share/generation/data/train/diffusions/5000/imgs -p /share/generation/data/train/diffusions/5000/pmps_seg_test1 -o /share/generation/models/online/diffusions/res/finetune/dreambooth/haomo_5000_seg1_ttt
-# pip install safetensors
-# python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
-# cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors
+pip install safetensors
+python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
+cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors
 
 echo "done"
