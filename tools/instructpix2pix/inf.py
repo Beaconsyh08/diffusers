@@ -18,9 +18,9 @@ def preprocess_image(url):
     
     return image
 
-prompts = ["make it rainy"]
+prompts = ["make it rainy", "make it snowy", "make it night", "make it cloudy"]
 # model_names = ["INS-Base", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
-model_names = ["INS-Base", "INS-HM-SNOWY-V0.0.0", "INS-HM-SNOWY-V0.0.1", "INS-HM-SNOWY-V0.1.0", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
+model_names = ["INS-HM-V0.0.0"]
 model_dir = "/mnt/ve_share/generation/models/online/diffusions/res/instructpix2pix/prompt-to-prompt"
 combine = True
 test_path = '/mnt/ve_share/generation/data/train/diffusions/test_20'

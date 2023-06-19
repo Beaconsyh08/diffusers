@@ -7,9 +7,13 @@ P2P_PATH = "/mnt/share_disk/syh/data/prompt_to_prompt/index.txt"
 SCENE = "all"
 PARA = "0.80_0.80_2.00"
 SIZE = 8000
-PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%d" % (SCENE, PARA, SIZE*4)
+PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%d_cn"  % (SCENE, PARA, SIZE*4)
 os.makedirs(PARQUET_PATH, exist_ok=True)
-PARQUET_PATH = "%s/p.parquet" % PARQUET_PATH
+PARQUET_PATH = "%s/pcn.parquet" % PARQUET_PATH
+
+FOLDER_PATH = "/mnt/ve_share/generation/data/p2p_cn/imgs"
+TYPE = "folder"
+ONLINE = True
 
 
 def prepare(input_image, edited_image, SIZE, scene):
@@ -33,8 +37,28 @@ def prepare(input_image, edited_image, SIZE, scene):
     return final_input_image, edit_prompt, final_edited_image
 
 
-with open (P2P_PATH, "r") as input_file:
-    paths = [_.strip().split("/") for _ in input_file.readlines()]
+if TYPE == "txt":
+    with open (P2P_PATH, "r") as input_file:
+        paths = [_.strip().split("/") for _ in input_file.readlines()]
+    
+elif TYPE == "folder":
+    paths = []
+    # Iterate over the files in the folder
+    for root, dirs, files in os.walk(FOLDER_PATH):
+        for file in files:
+            # Get the full path of the file
+            file_path = os.path.join(root, file)
+            paths.append(file_path)
+
+    paths = [_.strip().split("/") for _ in paths]
+    print(paths[:10])
+    
+    for _ in paths:
+        _[1] = "share"
+        del _[2]
+        
+    print(paths[:10])
+    print(len(paths))
     
 # -5: refine/replce
 # -4: scene

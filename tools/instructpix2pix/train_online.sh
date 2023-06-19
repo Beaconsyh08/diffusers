@@ -47,7 +47,7 @@ accelerate launch --mixed_precision="fp16" --multi_gpu ./examples/instruct_pix2p
  --train_batch_size=4 --gradient_accumulation_steps=4 --gradient_checkpointing \
  --max_train_steps=$ITER \
  --train_batch_size=$BATCH_SIZE \
- --checkpointing_steps=5000 --checkpoints_total_limit=1 \
+ --checkpointing_steps=2500\
  --learning_rate=5e-05 --lr_warmup_steps=0 \
  --conditioning_dropout_prob=0.05 \
  --mixed_precision=fp16 \
