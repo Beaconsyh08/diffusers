@@ -6,7 +6,7 @@ from tqdm import tqdm
 P2P_PATH = "/mnt/share_disk/syh/data/prompt_to_prompt/index.txt"
 SCENE = "all"
 PARA = "0.80_0.80_2.00"
-SIZE = 8000
+SIZE = 20000
 PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%d_cn"  % (SCENE, PARA, SIZE*4)
 os.makedirs(PARQUET_PATH, exist_ok=True)
 PARQUET_PATH = "%s/pcn.parquet" % PARQUET_PATH
@@ -24,6 +24,7 @@ def prepare(input_image, edited_image, SIZE, scene):
 
     assert len(final_edited_image) == len(final_input_image), print(len(final_edited_image), len(final_input_image))
 
+    # print(len(final_edited_image))
     sampled_items = random.sample(list(zip(final_input_image, final_edited_image)), SIZE)
 
     # Unpack the sampled items into separate lists

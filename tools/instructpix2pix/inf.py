@@ -1,11 +1,12 @@
 import PIL
-import requests
 import torch
-from diffusers import StableDiffusionInstructPix2PixPipeline, UniPCMultistepScheduler
+from diffusers import StableDiffusionInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel
 import os
 import cv2
 from tqdm import tqdm
 import numpy as np
+from transformers import CLIPTextModel
+
 
 
 def preprocess_image(url):
@@ -18,12 +19,13 @@ def preprocess_image(url):
     
     return image
 
-prompts = ["make it rainy", "make it snowy", "make it night", "make it cloudy"]
+prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
+# prompts = ["make it rainy"]
 # model_names = ["INS-Base", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
-model_names = ["INS-HM-V0.0.0"]
+model_names = ["INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.2.0", "INS-HM-V0.1.0/checkpoint-5000", "INS-HM-V0.1.0/checkpoint-10000", "INS-HM-V0.1.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-5000", "INS-HM-V0.2.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-20000", "INS-HM-V0.2.0/checkpoint-25000", "INS-HM-V0.2.0/checkpoint-30000"]
 model_dir = "/mnt/ve_share/generation/models/online/diffusions/res/instructpix2pix/prompt-to-prompt"
 combine = True
-test_path = '/mnt/ve_share/generation/data/train/diffusions/test_20'
+test_path = '/mnt/ve_share/generation/data/test/v0.0'
 image_paths = []
 for foldername, subfolders, filenames in os.walk(test_path):
     for filename in filenames:
@@ -36,7 +38,8 @@ print(n)
 
 for ind, model_name in enumerate(model_names):
     print(model_name)
-    res_dir = "/mnt/ve_share/generation/data/result/diffusions/vis/instructpix2pix/NORMAL_512/%s" % model_name
+    res_root = "/mnt/ve_share/generation/data/result/diffusions/vis/instructpix2pix/official"
+    res_dir = "%s/%s" % (res_root, model_name.split("/")[0] + "-" + model_name.split("/")[-1].split("-")[-1]) if "/" in model_name else "%s/%s" % (res_root, model_name)
     os.makedirs(res_dir, exist_ok=True)
     
     if model_name == "INS-Base":
@@ -44,10 +47,17 @@ for ind, model_name in enumerate(model_names):
     else:
         model_id= "%s/%s" % (model_dir, model_name)
         
-    pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
+    if "/" in model_name:
+        unet = UNet2DConditionModel.from_pretrained("%s/unet_ema" % model_id)
+        model_id_true = "/".join(model_id.split("/")[:-1])
+        pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id_true, unet=unet).to("cuda")
+        
+    else:
+        pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
     # pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
     
     for prompt in prompts:
+        print(prompt)
         img_lst = []
         res_dir_p = "%s/%s" % (res_dir, "_".join(prompt.split(" ")))
         os.makedirs(res_dir_p, exist_ok=True)
@@ -61,7 +71,7 @@ for ind, model_name in enumerate(model_names):
         
         for i, image_path in tqdm(enumerate(image_paths), total=len(image_paths)):
             test_image = preprocess_image(image_path)
-            image = pipe(prompt, image=test_image, num_inference_steps=20, image_guidance_scale=1.5, guidance_scale=7).images[0]
+            image = pipe(prompt, image=test_image, num_inference_steps=50, image_guidance_scale=1.5, guidance_scale=7).images[0]
             res_id = "%s/%d.png" % (res_dir_p, i)
             
             if combine:
