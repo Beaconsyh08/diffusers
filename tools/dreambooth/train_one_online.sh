@@ -40,14 +40,14 @@ echo "$BATCH_SIZE"
 
 accelerate config default
 export DATA_NAME="haomo"
-export MODEL_NAME="/share/generation/models/online/diffusions/base/stable-diffusion-v1-5"
+export MODEL_NAME="/mnt/ve_share/generation/models/online/diffusions/base/stable-diffusion-2-1"
 # export INSTANCE_DIR="./data/train/finetune/$DATA_NAME"
 # export INSTANCE_DIR="/share/generation/data/train/diffusions/5000/imgs"
 # export OUTPUT_DIR="/share/generation/models/online/diffusions/res/finetune/dreambooth/${DATA_NAME}_5000_seg1"
 # # export CLASS_DIR="./data/train/finetune/night_class"
 # export INSTANCE_PROMPT="/share/generation/data/train/diffusions/5000/pmps_seg_test1"
 
-accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth.py \
+accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
   --pretrained_model_name_or_path=$MODEL_NAME  \
   --train_text_encoder \
   --instance_data_dir=$INSTANCE_DIR \
@@ -60,7 +60,7 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth.py \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
   --max_train_steps=$ITER \
-  --checkpointing_steps=50000
+  --checkpointing_steps=20000
 
 # 1 for 160  max_train_steps * train_batch_size * gpu
   # --with_prior_preservation --prior_loss_weight=1.0 \
