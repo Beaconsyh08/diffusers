@@ -1,8 +1,9 @@
 import gradio as gr
 import os
 from PIL import Image
+import random
 
-root = "/mnt/ve_share/generation/data/result/diffusions/vis/instructpix2pix/official"
+root = "/mnt/ve_share/generation/data/result/diffusions/vis/instructpix2pix/casual"
 users = ["syh", "fkx", "lyy", "ckl", "others"]
 
 def feedback(feedback_text, model, scene, user):
@@ -37,7 +38,7 @@ def generation_eval():
         global length
         length = len(ret_imgs)
         print("%d Images" % length)
-        ret_imgs = [Image.open(_) for _ in ret_imgs]
+        ret_imgs = random.sample([Image.open(_) for _ in ret_imgs], min(50, length))
         return ret_imgs
 
     examples = []
@@ -70,14 +71,14 @@ def generation_eval():
                 #       choices=['未知(反馈可持续优化LSU🤗)', '准确率低(<30%)', '准确率中(30% ~ 80%)', '准确率高(>80%)',], value='未知(反馈可持续优化LSU🤗)')
             with gr.Column(scale=100):
                 out = gr.Gallery(label="检索结果为：").style(grid=6, height=200)
-                feedback_btn = gr.Textbox(value="", label="请填写合格图像数", elem_id=0, interactive=True)
-                user = gr.components.Radio(label="用户选择", choices=users, value=users[0], elem_id=2)
-                btn2 = gr.Button("提交")
+                # feedback_btn = gr.Textbox(value="", label="请填写合格图像数", elem_id=0, interactive=True)
+                # user = gr.components.Radio(label="用户选择", choices=users, value=users[0], elem_id=2)
+                # btn2 = gr.Button("提交")
             
         # inputs = [text, num, model, thumbnail]
         inputs = [model, scene]
         btn.click(fn=clip_api, inputs=inputs, outputs=[out])
-        btn2.click(feedback, inputs=[feedback_btn, model, scene, user])
+        # btn2.click(feedback, inputs=[feedback_btn, model, scene, user])
         # feedback_btn.change(feedback, inputs=feedback_btn)
         gr.Examples(examples, inputs=inputs)
     return demo

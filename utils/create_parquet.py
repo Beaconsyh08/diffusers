@@ -3,7 +3,12 @@ import random
 import os
 from tqdm import tqdm
 
-P2P_PATH = "/mnt/share_disk/syh/data/prompt_to_prompt/index.txt"
+# P2P + ControlNet
+P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_controlnet/index.txt"  
+
+# P2P
+# P2P_PATH = "tos://haomo-public/lucas-generation/syh/train/instructpix2pix/index.txt"
+
 MODE = "replace_blend_reweight"
 SCENE = "night"
 FOLDER_PATH = "/mnt/ve_share/generation/data/p2p_cn/imgs/%s/%s" % (MODE, SCENE)
@@ -11,7 +16,7 @@ TYPE = "folder"
 ONLINE = True
 
 PARA = "0.80_0.80_2.00"
-SIZE = 1000
+SIZE = 10
 STREET = False
 PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)

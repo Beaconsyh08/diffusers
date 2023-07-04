@@ -6,7 +6,7 @@ from tqdm import tqdm
 P2P_PATH = "/mnt/share_disk/syh/data/prompt_to_prompt/index.txt"
 SCENE = "all"
 PARA = "0.80_0.80_2.00"
-SIZE = 20000
+SIZE = 100
 PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%d_cn"  % (SCENE, PARA, SIZE*4)
 os.makedirs(PARQUET_PATH, exist_ok=True)
 PARQUET_PATH = "%s/pcn.parquet" % PARQUET_PATH

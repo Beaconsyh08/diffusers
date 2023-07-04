@@ -19,13 +19,22 @@ def preprocess_image(url):
     
     return image
 
-prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
+# prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
+prompts = ["make it night", "make it rainy", "make it snowy"]
+
 # prompts = ["make it rainy"]
 # model_names = ["INS-Base", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
-model_names = ["INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.2.0", "INS-HM-V0.1.0/checkpoint-5000", "INS-HM-V0.1.0/checkpoint-10000", "INS-HM-V0.1.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-5000", "INS-HM-V0.2.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-20000", "INS-HM-V0.2.0/checkpoint-25000", "INS-HM-V0.2.0/checkpoint-30000"]
+# model_names = ["INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.2.0", "INS-HM-V0.1.0/checkpoint-5000", "INS-HM-V0.1.0/checkpoint-10000", "INS-HM-V0.1.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-5000", "INS-HM-V0.2.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-20000", "INS-HM-V0.2.0/checkpoint-25000", "INS-HM-V0.2.0/checkpoint-30000"]
+model_names = ["INS-HM-V0.3.0"]
 model_dir = "/mnt/ve_share/generation/models/online/diffusions/res/instructpix2pix/prompt-to-prompt"
 combine = True
+
 test_path = '/mnt/ve_share/generation/data/test/v0.0'
+res_root = "/mnt/ve_share/generation/data/result/diffusions/vis/instructpix2pix/official"
+
+# test_path = '/mnt/ve_share/generation/data/test/kl/'
+# res_root = "/mnt/ve_share/generation/data/result/diffusions/vis/instructpix2pix/casual"
+
 image_paths = []
 for foldername, subfolders, filenames in os.walk(test_path):
     for filename in filenames:
@@ -38,7 +47,6 @@ print(n)
 
 for ind, model_name in enumerate(model_names):
     print(model_name)
-    res_root = "/mnt/ve_share/generation/data/result/diffusions/vis/instructpix2pix/official"
     res_dir = "%s/%s" % (res_root, model_name.split("/")[0] + "-" + model_name.split("/")[-1].split("-")[-1]) if "/" in model_name else "%s/%s" % (res_root, model_name)
     os.makedirs(res_dir, exist_ok=True)
     
