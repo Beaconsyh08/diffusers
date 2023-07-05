@@ -216,6 +216,14 @@ def import_model_class_from_model_name_or_path(pretrained_model_name_or_path: st
 def parse_args(input_args=None):
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
     parser.add_argument(
+        "--diff_prompt",
+        action="store_true",
+        default=False,
+        help=(
+            "Diff Prompts for Diff Images"
+        ),
+    )
+    parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
         default=None,
@@ -606,9 +614,15 @@ class DreamBoothDataset(Dataset):
         if not self.instance_data_root.exists():
             raise ValueError(f"Instance {self.instance_data_root} images root doesn't exists.")
 
-        self.instance_images_path = list(Path(instance_data_root).iterdir())
+        self.instance_images_path = [_.strip() for _ in open(instance_data_root, "r").readlines()] if instance_data_root.endswith("txt") else list(Path(instance_data_root).iterdir())
+        print("Image Paths: ", self.instance_images_path[:10])
+        
         self.num_instance_images = len(self.instance_images_path)
         self.instance_prompt = instance_prompt
+        if args.diff_prompt:
+            self.instance_prompt_path = [_.strip() for _ in open(instance_prompt, "r").readlines()] if instance_prompt.endswith("txt") else list(Path(instance_prompt).iterdir())
+            print("Prompt Paths: ", self.instance_prompt_path[:10])
+        
         self._length = self.num_instance_images
 
         if class_data_root is not None:
@@ -644,15 +658,22 @@ class DreamBoothDataset(Dataset):
         if not instance_image.mode == "RGB":
             instance_image = instance_image.convert("RGB")
         example["instance_images"] = self.image_transforms(instance_image)
-
-        if self.encoder_hidden_states is not None:
-            example["instance_prompt_ids"] = self.encoder_hidden_states
-        else:
-            text_inputs = tokenize_prompt(
-                self.tokenizer, self.instance_prompt, tokenizer_max_length=self.tokenizer_max_length
-            )
+        
+        if args.diff_prompt:
+            with open(self.instance_prompt_path[index % self.num_instance_images], "r") as input_prompt:
+                instance_prompt = ",".join(input_prompt.readlines())
+            text_inputs = tokenize_prompt(self.tokenizer, instance_prompt, tokenizer_max_length=self.tokenizer_max_length)
             example["instance_prompt_ids"] = text_inputs.input_ids
             example["instance_attention_mask"] = text_inputs.attention_mask
+        else:
+            if self.encoder_hidden_states is not None:
+                example["instance_prompt_ids"] = self.encoder_hidden_states
+            else:
+                text_inputs = tokenize_prompt(
+                    self.tokenizer, self.instance_prompt, tokenizer_max_length=self.tokenizer_max_length
+                )
+                example["instance_prompt_ids"] = text_inputs.input_ids
+                example["instance_attention_mask"] = text_inputs.attention_mask
 
         if self.class_data_root:
             class_image = Image.open(self.class_images_path[index % self.num_class_images])

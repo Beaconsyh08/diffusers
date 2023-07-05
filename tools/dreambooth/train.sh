@@ -2,7 +2,7 @@ accelerate config default
 DATA_NAME="haomo_night"
 export MODEL_NAME="/mnt/share_disk/lei/git/diffusers/local_models/stable-diffusion-v1-5"
 # export INSTANCE_DIR="./data/train/finetune/$DATA_NAME"
-export INSTANCE_DIR="/mnt/ve_share/generation/data/train/GAN/night_200/trainB"
+export INSTANCE_DIR="/mnt/ve_share/generation/data/train/GAN/night/trainB"
 export OUTPUT_DIR="./res/finetune/dreambooth/${DATA_NAME}_sks_200x"
 export CLASS_DIR="./data/train/finetune/night_class"
 

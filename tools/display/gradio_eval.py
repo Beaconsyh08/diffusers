@@ -24,7 +24,7 @@ def get_file_paths(folder_path):
 def generation_eval():
     # print("request.headers: ", request.headers)
     models = sorted([f for f in os.listdir(root) if os.path.isdir(os.path.join(root, f))])
-    model_root = "%s/%s" % (root, models[-2])
+    model_root = "%s/%s" % (root, models[0])
     scenes = [f for f in os.listdir(model_root) if os.path.isdir(os.path.join(model_root, f))]
     display_scenes = [_.split("_")[-1] for _ in scenes]
 
