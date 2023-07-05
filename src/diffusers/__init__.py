@@ -73,7 +73,9 @@ else:
     )
     from .schedulers import (
         DDIMInverseScheduler,
+        DDIMParallelScheduler,
         DDIMScheduler,
+        DDPMParallelScheduler,
         DDPMScheduler,
         DEISMultistepScheduler,
         DPMSolverMultistepInverseScheduler,
@@ -149,8 +151,10 @@ else:
         StableDiffusionInpaintPipelineLegacy,
         StableDiffusionInstructPix2PixPipeline,
         StableDiffusionLatentUpscalePipeline,
+        StableDiffusionLDM3DPipeline,
         StableDiffusionModelEditingPipeline,
         StableDiffusionPanoramaPipeline,
+        StableDiffusionParadigmsPipeline,
         StableDiffusionPipeline,
         StableDiffusionPipelineSafe,
         StableDiffusionPix2PixZeroPipeline,
@@ -169,6 +173,7 @@ else:
         VersatileDiffusionImageVariationPipeline,
         VersatileDiffusionPipeline,
         VersatileDiffusionTextToImagePipeline,
+        VideoToVideoSDPipeline,
         VQDiffusionPipeline,
     )
 
