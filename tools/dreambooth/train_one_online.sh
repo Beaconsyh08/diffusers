@@ -47,7 +47,7 @@ export MODEL_NAME="/mnt/ve_share/generation/models/online/diffusions/base/stable
 # # export CLASS_DIR="./data/train/finetune/night_class"
 # export INSTANCE_PROMPT="/share/generation/data/train/diffusions/5000/pmps_seg_test1"
 
-accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth_one.py \
+accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth.py \
   --pretrained_model_name_or_path=$MODEL_NAME  \
   --train_text_encoder \
   --instance_data_dir=$INSTANCE_DIR \
