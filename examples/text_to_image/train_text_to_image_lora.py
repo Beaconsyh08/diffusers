@@ -923,28 +923,28 @@ def main():
     pipeline.unet.load_attn_procs(args.output_dir)
 
     # run inference
-    generator = torch.Generator(device=accelerator.device)
-    if args.seed is not None:
-        generator = generator.manual_seed(args.seed)
-    images = []
-    for _ in range(args.num_validation_images):
-        images.append(pipeline(args.validation_prompt, num_inference_steps=30, generator=generator).images[0])
+    # generator = torch.Generator(device=accelerator.device)
+    # if args.seed is not None:
+    #     generator = generator.manual_seed(args.seed)
+    # images = []
+    # for _ in range(args.num_validation_images):
+    #     images.append(pipeline(args.validation_prompt, num_inference_steps=30, generator=generator).images[0])
 
-    if accelerator.is_main_process:
-        for tracker in accelerator.trackers:
-            if len(images) != 0:
-                if tracker.name == "tensorboard":
-                    np_images = np.stack([np.asarray(img) for img in images])
-                    tracker.writer.add_images("test", np_images, epoch, dataformats="NHWC")
-                if tracker.name == "wandb":
-                    tracker.log(
-                        {
-                            "test": [
-                                wandb.Image(image, caption=f"{i}: {args.validation_prompt}")
-                                for i, image in enumerate(images)
-                            ]
-                        }
-                    )
+    # if accelerator.is_main_process:
+    #     for tracker in accelerator.trackers:
+    #         if len(images) != 0:
+    #             if tracker.name == "tensorboard":
+    #                 np_images = np.stack([np.asarray(img) for img in images])
+    #                 tracker.writer.add_images("test", np_images, epoch, dataformats="NHWC")
+    #             if tracker.name == "wandb":
+    #                 tracker.log(
+    #                     {
+    #                         "test": [
+    #                             wandb.Image(image, caption=f"{i}: {args.validation_prompt}")
+    #                             for i, image in enumerate(images)
+    #                         ]
+    #                     }
+    #                 )
 
     accelerator.end_training()
 

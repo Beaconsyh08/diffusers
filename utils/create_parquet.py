@@ -12,7 +12,7 @@ P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_control
 MODE = "replace_blend_reweight"
 SCENE = "night"
 FOLDER_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn/imgs/%s/%s" % (MODE, SCENE)
-TYPE = "folder"
+TYPE = "txt"
 ONLINE = True
 
 PARA = "0.80_0.80_2.00"
@@ -24,6 +24,7 @@ PARQUET_PATH = "%s/pcn.parquet" % PARQUET_PATH
 
 if TYPE == "txt":
     with open (P2P_PATH, "r") as input_file:
+        print(P2P_PATH)
         paths = [_.strip().split("/") for _ in input_file.readlines()]
     
 elif TYPE == "folder":

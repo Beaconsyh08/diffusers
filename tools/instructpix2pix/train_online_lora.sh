@@ -1,4 +1,4 @@
-pip install -e ".[torch]"
+# pip install -e ".[torch]"
 
 helpFunction()
 {
@@ -35,7 +35,7 @@ echo "$OUTPUT_DIR"
 echo "$ITER"
 echo "$BATCH_SIZE"
 
-export MODEL_NAME="/share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
+export MODEL_NAME="/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
 # export DATASET_ID="/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/instructpix2pix-1000-samples"
 # export OUTPUT_DIR="/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instruct-pix2pix-test"
 
@@ -57,6 +57,6 @@ accelerate launch --mixed_precision="fp16" --multi_gpu ./examples/instruct_pix2p
 
 #   --enable_xformers_memory_efficient_attention \
 
-pip install safetensors
-python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
-cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors
+# pip install safetensors
+# python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
+# cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors

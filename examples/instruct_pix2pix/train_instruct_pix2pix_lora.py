@@ -74,8 +74,8 @@ def parse_args():
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
-        default=None,
-        required=True,
+        default="/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix",
+        required=False,
         help="Path to pretrained model or model identifier from huggingface.co/models.",
     )
     parser.add_argument(
@@ -88,7 +88,7 @@ def parse_args():
     parser.add_argument(
         "--dataset_name",
         type=str,
-        default=None,
+        default="/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/replace_blend_reweight_night_0.80_0.80_2.00_10_cn/",
         help=(
             "The name of the Dataset (from the HuggingFace hub) to train on (could be your own, possibly private,"
             " dataset). It can also be a path pointing to a local copy of a dataset in your filesystem,"
@@ -165,7 +165,7 @@ def parse_args():
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="instruct-pix2pix-model",
+        default="/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/prompt-to-prompt/INS-HM-VTEST",
         help="The output directory where the model predictions and checkpoints will be written.",
     )
     parser.add_argument(
@@ -174,7 +174,7 @@ def parse_args():
         default=None,
         help="The directory where the downloaded models and datasets will be stored.",
     )
-    parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")
+    parser.add_argument("--seed", type=int, default=42, help="A seed for reproducible training.")
     parser.add_argument(
         "--resolution",
         type=int,
@@ -205,7 +205,7 @@ def parse_args():
     parser.add_argument(
         "--max_train_steps",
         type=int,
-        default=None,
+        default=15,
         help="Total number of training steps to perform.  If provided, overrides num_train_epochs.",
     )
     parser.add_argument(
@@ -523,12 +523,12 @@ def main():
         # size 4 will cause error
         # new_conv_in.weight[:, :4, :, :].copy_(unet.conv_in.weight)
         new_conv_in.weight[:, :8, :, :].copy_(unet.conv_in.weight)
-        unet.conv_in = new_conv_in
+        unet.conv_in = new_conv_in.to("cuda")
 
     # Freeze vae and text_encoder
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
-
+    
     # Create EMA for the unet.
     if args.use_ema:
         ema_unet = EMAModel(unet.parameters(), model_cls=UNet2DConditionModel, model_config=unet.config)
@@ -545,6 +545,7 @@ def main():
             unet.enable_xformers_memory_efficient_attention()
         else:
             raise ValueError("xformers is not available. Make sure it is installed correctly")
+    print(5, unet.device)
 
     # `accelerate` 0.16.0 will have better support for customized saving
     if version.parse(accelerate.__version__) >= version.parse("0.16.0"):
@@ -1006,51 +1007,55 @@ def main():
     # Create the pipeline using the trained modules and save it.
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        unet = accelerator.unwrap_model(unet)
-        if args.use_ema:
-            ema_unet.copy_to(unet.parameters())
+        unet = unet.to(torch.float32)
+        unet.save_attn_procs(args.output_dir)
 
-        pipeline = StableDiffusionInstructPix2PixPipeline.from_pretrained(
-            args.pretrained_model_name_or_path,
-            text_encoder=accelerator.unwrap_model(text_encoder),
-            vae=accelerator.unwrap_model(vae),
-            unet=unet,
-            revision=args.revision,
-        )
-        pipeline.save_pretrained(args.output_dir)
+    # if accelerator.is_main_process:
+    #     unet = accelerator.unwrap_model(unet)
+    #     if args.use_ema:
+    #         ema_unet.copy_to(unet.parameters())
 
-        if args.push_to_hub:
-            upload_folder(
-                repo_id=repo_id,
-                folder_path=args.output_dir,
-                commit_message="End of training",
-                ignore_patterns=["step_*", "epoch_*"],
-            )
+    #     pipeline = StableDiffusionInstructPix2PixPipeline.from_pretrained(
+    #         args.pretrained_model_name_or_path,
+    #         text_encoder=accelerator.unwrap_model(text_encoder),
+    #         vae=accelerator.unwrap_model(vae),
+    #         unet=unet,
+    #         revision=args.revision,
+    #     )
+    #     pipeline.save_pretrained(args.output_dir)
 
-        if args.validation_prompt is not None:
-            edited_images = []
-            pipeline = pipeline.to(accelerator.device)
-            with torch.autocast(str(accelerator.device).replace(":0", "")):
-                for _ in range(args.num_validation_images):
-                    edited_images.append(
-                        pipeline(
-                            args.validation_prompt,
-                            image=original_image,
-                            num_inference_steps=20,
-                            image_guidance_scale=1.5,
-                            guidance_scale=7,
-                            generator=generator,
-                        ).images[0]
-                    )
+    #     if args.push_to_hub:
+    #         upload_folder(
+    #             repo_id=repo_id,
+    #             folder_path=args.output_dir,
+    #             commit_message="End of training",
+    #             ignore_patterns=["step_*", "epoch_*"],
+    #         )
 
-            for tracker in accelerator.trackers:
-                if tracker.name == "wandb":
-                    wandb_table = wandb.Table(columns=WANDB_TABLE_COL_NAMES)
-                    for edited_image in edited_images:
-                        wandb_table.add_data(
-                            wandb.Image(original_image), wandb.Image(edited_image), args.validation_prompt
-                        )
-                    tracker.log({"test": wandb_table})
+    #     if args.validation_prompt is not None:
+    #         edited_images = []
+    #         pipeline = pipeline.to(accelerator.device)
+    #         with torch.autocast(str(accelerator.device).replace(":0", "")):
+    #             for _ in range(args.num_validation_images):
+    #                 edited_images.append(
+    #                     pipeline(
+    #                         args.validation_prompt,
+    #                         image=original_image,
+    #                         num_inference_steps=20,
+    #                         image_guidance_scale=1.5,
+    #                         guidance_scale=7,
+    #                         generator=generator,
+    #                     ).images[0]
+    #                 )
+
+    #         for tracker in accelerator.trackers:
+    #             if tracker.name == "wandb":
+    #                 wandb_table = wandb.Table(columns=WANDB_TABLE_COL_NAMES)
+    #                 for edited_image in edited_images:
+    #                     wandb_table.add_data(
+    #                         wandb.Image(original_image), wandb.Image(edited_image), args.validation_prompt
+    #                     )
+    #                 tracker.log({"test": wandb_table})
 
     accelerator.end_training()
 
