@@ -35,12 +35,11 @@ echo "$OUTPUT_DIR"
 echo "$ITER"
 echo "$BATCH_SIZE"
 
-export MODEL_NAME="/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
-# export DATASET_ID="/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/instructpix2pix-1000-samples"
-# export OUTPUT_DIR="/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instruct-pix2pix-test"
+export MODEL_NAME="/share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
 
 accelerate launch --multi_gpu ./examples/instruct_pix2pix/train_instruct_pix2pix_lora.py \
  --pretrained_model_name_or_path=$MODEL_NAME \
+ --use_ema \
  --dataset_name=$DATASET_ID \
  --resolution=512 --random_flip \
  --gradient_accumulation_steps=4 --gradient_checkpointing \
