@@ -45,7 +45,7 @@ accelerate launch --multi_gpu ./examples/instruct_pix2pix/train_instruct_pix2pix
  --gradient_accumulation_steps=4 --gradient_checkpointing \
  --max_train_steps=$ITER \
  --train_batch_size=$BATCH_SIZE \
- --checkpointing_steps=30\
+ --checkpointing_steps=100 \
  --learning_rate=5e-05 --lr_warmup_steps=0 \
  --conditioning_dropout_prob=0.05 \
  --seed=42 \
