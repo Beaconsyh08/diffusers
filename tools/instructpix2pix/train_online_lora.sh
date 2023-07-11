@@ -1,4 +1,4 @@
-# pip install -e ".[torch]"
+pip install -e ".[torch]"
 
 helpFunction()
 {
