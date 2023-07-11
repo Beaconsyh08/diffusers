@@ -1,6 +1,6 @@
 accelerate config default
 export MODEL_NAME="/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/stable-diffusion-v1-5"
-export OUTPUT_DIR="/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/prompt-to-prompt/LORA-TEST"
+export OUTPUT_DIR="/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix//LORA-TEST"
 # export HUB_MODEL_ID="pokemon-lora"
 # export DATASET_NAME="./data/train/finetune/pokemon/data"
 export DATASET_NAME="/mnt/ve_share/songyuhao/generation/data/pokemon"
@@ -17,7 +17,7 @@ accelerate launch --mixed_precision="fp16"  ./examples/text_to_image/train_text_
   --max_grad_norm=1 \
   --lr_scheduler="cosine" --lr_warmup_steps=0 \
   --output_dir=${OUTPUT_DIR} \
-  --checkpointing_steps=500 \
+  --checkpointing_steps=5 \
   --seed=1337
 
   # --report_to=wandb \

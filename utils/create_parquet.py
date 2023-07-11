@@ -16,7 +16,7 @@ TYPE = "txt"
 ONLINE = True
 
 PARA = "0.80_0.80_2.00"
-SIZE = 10
+SIZE = 100
 STREET = False
 PARQUET_PATH = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)

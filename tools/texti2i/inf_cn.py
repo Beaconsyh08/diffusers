@@ -45,7 +45,7 @@ prompts = ["make it night", "make it rainy", "make it snowy"]
 
 
 model_names = ["INS-HM-V0.1.0"]
-model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/prompt-to-prompt"
+model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/"
 combine = True
 
 test_path = '/mnt/ve_share/songyuhao/generation/data/test/v0.0'

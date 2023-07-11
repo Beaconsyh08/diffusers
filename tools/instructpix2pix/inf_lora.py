@@ -8,7 +8,6 @@ import numpy as np
 from transformers import CLIPTextModel
 
 
-
 def preprocess_image(url):
     # image = PIL.Image.open(requests.get(url, stream=True).raw)
     image = PIL.Image.open(url)
@@ -19,18 +18,14 @@ def preprocess_image(url):
     
     return image
 
-# prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
-prompts = ["make it night", "make it rainy", "make it snowy"]
-
-# prompts = ["make it rainy"]
-# model_names = ["INS-Base", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
-# model_names = ["INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.2.0", "INS-HM-V0.1.0/checkpoint-5000", "INS-HM-V0.1.0/checkpoint-10000", "INS-HM-V0.1.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-5000", "INS-HM-V0.2.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-20000", "INS-HM-V0.2.0/checkpoint-25000", "INS-HM-V0.2.0/checkpoint-30000"]
-model_names = ["INS-HM-V0.3.0"]
-model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/"
+model_base = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
+prompts = ["make it night"]
+lora_names = ["INS-HM-VTEST", "INS-HM-VTEST/checkpoint-20"]
+model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/lora"
 combine = True
 
 test_path = '/mnt/ve_share/songyuhao/generation/data/test/v0.0'
-res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
+res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/lora"
 
 # test_path = '/mnt/ve_share/songyuhao/generation/data/test/kl/'
 # res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/casual"
@@ -45,24 +40,25 @@ for foldername, subfolders, filenames in os.walk(test_path):
 n = len(image_paths)
 print(n)
 
-for ind, model_name in enumerate(model_names):
-    print(model_name)
-    res_dir = "%s/%s" % (res_root, model_name.split("/")[0] + "-" + model_name.split("/")[-1].split("-")[-1]) if "/" in model_name else "%s/%s" % (res_root, model_name)
+for ind, lora_name in enumerate(lora_names):
+    print(lora_name)
+    res_dir = "%s/%s" % (res_root, lora_name.split("/")[0] + "-" + lora_name.split("/")[-1].split("-")[-1]) if "/" in lora_name else "%s/%s" % (res_root, lora_name)
     os.makedirs(res_dir, exist_ok=True)
     
-    if model_name == "INS-Base":
-        model_id = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
+    
+    
+    pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_base, torch_dtype=torch.float16).to("cuda")
+    if lora_name == "INS-Base":
+        pass
+    # elif "/" in lora_name:
+    #     lora_model = "%s/%s" % (model_dir, lora_name)
+    #     pipe.unet.load_attn_procs(lora_model)
+    #     pipe.to("cuda")
     else:
-        model_id= "%s/%s" % (model_dir, model_name)
-        
-    if "/" in model_name:
-        unet = UNet2DConditionModel.from_pretrained("%s/unet_ema" % model_id)
-        model_id_true = "/".join(model_id.split("/")[:-1])
-        pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id_true, unet=unet).to("cuda")
-        
-    else:
-        pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
-    # pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
+        lora_model = "%s/%s" % (model_dir, lora_name)
+        pipe.unet.load_attn_procs(lora_model)
+        pipe.to("cuda")
+        # pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
     
     for prompt in prompts:
         print(prompt)

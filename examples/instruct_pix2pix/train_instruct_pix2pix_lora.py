@@ -88,7 +88,7 @@ def parse_args():
     parser.add_argument(
         "--dataset_name",
         type=str,
-        default="/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/replace_blend_reweight_night_0.80_0.80_2.00_10_cn/",
+        default="/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/replace_blend_reweight_night_0.80_0.80_2.00_100_cn/",
         help=(
             "The name of the Dataset (from the HuggingFace hub) to train on (could be your own, possibly private,"
             " dataset). It can also be a path pointing to a local copy of a dataset in your filesystem,"
@@ -165,7 +165,7 @@ def parse_args():
     parser.add_argument(
         "--output_dir",
         type=str,
-        default="/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/prompt-to-prompt/INS-HM-VTEST",
+        default="/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/INS-HM-VTEST",
         help="The output directory where the model predictions and checkpoints will be written.",
     )
     parser.add_argument(
@@ -178,7 +178,7 @@ def parse_args():
     parser.add_argument(
         "--resolution",
         type=int,
-        default=256,
+        default=512,
         help=(
             "The resolution for input images, all the images in the train/validation dataset will be resized to this"
             " resolution"
@@ -205,13 +205,13 @@ def parse_args():
     parser.add_argument(
         "--max_train_steps",
         type=int,
-        default=15,
+        default=150,
         help="Total number of training steps to perform.  If provided, overrides num_train_epochs.",
     )
     parser.add_argument(
         "--gradient_accumulation_steps",
         type=int,
-        default=1,
+        default=4,
         help="Number of updates steps to accumulate before performing a backward/update pass.",
     )
     parser.add_argument(
@@ -222,7 +222,7 @@ def parse_args():
     parser.add_argument(
         "--learning_rate",
         type=float,
-        default=1e-4,
+        default=5e-05,
         help="Initial learning rate (after the potential warmup period) to use.",
     )
     parser.add_argument(
@@ -241,12 +241,12 @@ def parse_args():
         ),
     )
     parser.add_argument(
-        "--lr_warmup_steps", type=int, default=500, help="Number of steps for the warmup in the lr scheduler."
+        "--lr_warmup_steps", type=int, default=0, help="Number of steps for the warmup in the lr scheduler."
     )
     parser.add_argument(
         "--conditioning_dropout_prob",
         type=float,
-        default=None,
+        default=0.05,
         help="Conditioning dropout probability. Drops out the conditionings (image and edit prompt) used in training InstructPix2Pix. See section 3.2.1 in the paper: https://arxiv.org/abs/2211.09800.",
     )
     parser.add_argument(
@@ -325,7 +325,7 @@ def parse_args():
     parser.add_argument(
         "--checkpointing_steps",
         type=int,
-        default=500,
+        default=10,
         help=(
             "Save a checkpoint of the training state every X updates. These checkpoints are only suitable for resuming"
             " training using `--resume_from_checkpoint`."
@@ -578,8 +578,8 @@ def main():
                 model.load_state_dict(load_model.state_dict())
                 del load_model
 
-        accelerator.register_save_state_pre_hook(save_model_hook)
-        accelerator.register_load_state_pre_hook(load_model_hook)
+        # accelerator.register_save_state_pre_hook(save_model_hook)
+        # accelerator.register_load_state_pre_hook(load_model_hook)
 
     if args.gradient_checkpointing:
         unet.enable_gradient_checkpointing()
@@ -939,7 +939,9 @@ def main():
                                     shutil.rmtree(removing_checkpoint)
 
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
+                        print(save_path)
                         accelerator.save_state(save_path)
+                        os.system("mv %s/pytorch_model.bin %s/pytorch_lora_weights.bin" % (save_path, save_path))
                         logger.info(f"Saved state to {save_path}")
 
             logs = {"step_loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
