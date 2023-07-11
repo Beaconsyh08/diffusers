@@ -69,7 +69,7 @@ def load_and_dowmload_imgs(json_path, save_dir, mode):
             
                 
 
-jsontxt_path = '/mnt/ve_share/generation/lsu_query/dusk.txt'
+jsontxt_path = '/mnt/ve_share/songyuhao/generation/lsu_query/dusk.txt'
 # jsontxt_folder = "/share/2d-od/lei/aiday_inf/demo2"
 save_dir = '/mnt/share_disk/syh/data/train/diffusions/lsu/imgs/dusk'  
 # save_dir = '/mnt/ve_share/yayun'

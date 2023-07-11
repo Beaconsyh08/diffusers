@@ -16,9 +16,9 @@ style = "load"  # ["inf" | "load"]
 # model_names = ["SD-Base", "SD-HM-V0.0", "SD-HM-V0.1", "SD-HM-V1.0", "SD-HM-V1.1", "SD-HM-V1.2", "SD-HM-V2.0", "SD-HM-V3.0", "SD-HM-V3.0.1", "SD-HM-V3.1", "SD-HM-V4.0", "SD-HM-V4.1"]
 model_names = ["SD-Base", "SD-HM-V0.0", "SD-HM-V0.1", "SD-HM-V1.0", "SD-HM-V1.1", "SD-HM-V1.2", "SD-HM-V2.0", "SD-HM-V3.0", "SD-HM-V3.0.1", "SD-HM-V3.1", "SD-HM-V3.1.1", "SD-HM-V4.0", "SD-HM-V4.0.1", "SD-HM-V4.1", "SD-HM-V4.1.1"]
 
-model_dir = "/mnt/ve_share/generation/models/online/diffusions/res/finetune/dreambooth"
-
-clip_score_fn = partial(clip_score, model_name_or_path="/mnt/ve_share/generation/models/online/diffusions/base/clip-vit-base-patch16")
+model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/finetune/dreambooth"
+clip_path = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/clip-vit-base-patch16"
+clip_score_fn = partial(clip_score, model_name_or_path=clip_path)
 
 def calculate_clip_score(images, prompts):
     images_int = (images * 255).astype("uint8")
@@ -35,6 +35,7 @@ def load_images_from_folder(folder_path):
                 images.append(np.array(image))
     return images
 
+
 if style == "inf":
     prompts = [
         "a photo of an astronaut riding a horse on mars",
@@ -48,7 +49,7 @@ if style == "inf":
     seed = 0
     generator = torch.manual_seed(seed)
 
-    model_ckpt = "/mnt/ve_share/generation/models/online/diffusions/base/stable-diffusion-v1-5"
+    model_ckpt = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/stable-diffusion-v1-5"
     sd_pipeline = StableDiffusionPipeline.from_pretrained(model_ckpt, torch_dtype=torch.float16).to("cuda")
     images = sd_pipeline(prompts, num_images_per_prompt=3, generator=generator, output_type="np").images
     print(images.shape)
@@ -58,7 +59,7 @@ elif style == "load":
     res = dict()
     clip_scores = []
     for ind, model_name in enumerate(tqdm(model_names)):
-        model_dir = "/mnt/ve_share/generation/data/result/diffusions/vis/dreambooth/%s" % model_name
+        model_dir = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/dreambooth/%s" % model_name
         images, prompts = [], [] 
         for prompt in os.listdir(model_dir):
             prompt_dir = "%s/%s" % (model_dir, prompt)
@@ -74,8 +75,8 @@ elif style == "load":
             prompts += prompts_p
         # prompts = np.array(prompts)
         images = np.array(images)
-        print(images.shape)
         clip_score = calculate_clip_score(images, prompts)
+        print(model_name, clip_score)
         clip_scores.append(clip_score)
         
         
@@ -87,10 +88,6 @@ elif style == "load":
 
     # Format the date and time as a string
     formatted_datetime = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
-    save_path = "/mnt/ve_share/generation/data/result/diffusions/eval/%s.xlsx" % formatted_datetime
+    save_path = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/eval/%s.xlsx" % formatted_datetime
     print(save_path)
     res_pd.to_excel(save_path, index=True)
-        
-                
-        
-    

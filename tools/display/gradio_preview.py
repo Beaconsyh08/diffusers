@@ -3,13 +3,13 @@ import os
 from PIL import Image
 import random
 
-root = "/mnt/ve_share/generation/data/result/diffusions/vis/instructpix2pix/casual"
+root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/casual"
 users = ["syh", "fkx", "lyy", "ckl", "others"]
 
 def feedback(feedback_text, model, scene, user):
     print("click")
     output = "%s@%s@%s@%s" % (user, scene, feedback_text, length)
-    log_path = "/mnt/ve_share/generation/records/txt/%s.txt" % (model)
+    log_path = "/mnt/ve_share/songyuhao/generation/records/txt/%s.txt" % (model)
     with open(log_path, "a") as input_file:
         input_file.writelines(output + "\n")
         print(output)

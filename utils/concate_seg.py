@@ -3,9 +3,9 @@ import pickle
 from tqdm import tqdm
 from collections import Counter, defaultdict
 
-DICT_DIR = "/mnt/ve_share/generation/data/train/diffusions/comb_ins/dict"
-PMPS_DIR = "/mnt/ve_share/generation/data/train/diffusions/comb_ins/pmps"
-RES_DIR = "/mnt/ve_share/generation/data/train/diffusions/comb_ins/pmps_seg_some"
+DICT_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/comb_ins/dict"
+PMPS_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/comb_ins/pmps"
+RES_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/comb_ins/pmps_seg_some"
 
 os.makedirs(RES_DIR, exist_ok=True)
 

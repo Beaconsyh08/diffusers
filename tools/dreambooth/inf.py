@@ -46,17 +46,17 @@ prompts = ["a street filled with lots of traffic at night time with lights on an
 model_names = ["SD-HM-V0.6.2"]
 
 # model_dir = "./res/finetune/dreambooth" 
-model_dir = "/mnt/ve_share/generation/models/online/diffusions/res/finetune/dreambooth"
+model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/finetune/dreambooth"
 n = 20
 combine = False
 
 for ind, model_name in enumerate(model_names):
     print(model_name)
-    res_dir = "/mnt/ve_share/generation/data/result/diffusions/vis/dreambooth/%s" % model_name
+    res_dir = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/dreambooth/%s" % model_name
     os.makedirs(res_dir, exist_ok=True)
     
     if model_name == "SD-Base":
-        model_id = "/mnt/ve_share/generation/models/online/diffusions/base/stable-diffusion-v1-5"
+        model_id = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/stable-diffusion-v1-5"
         pipe = StableDiffusionPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
     
     else:

@@ -11,14 +11,14 @@ P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_control
 
 MODE = "replace_blend_reweight"
 SCENE = "night"
-FOLDER_PATH = "/mnt/ve_share/generation/data/p2p_cn/imgs/%s/%s" % (MODE, SCENE)
+FOLDER_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn/imgs/%s/%s" % (MODE, SCENE)
 TYPE = "folder"
 ONLINE = True
 
 PARA = "0.80_0.80_2.00"
 SIZE = 10
 STREET = False
-PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn" % (MODE, SCENE, PARA, SIZE)
+PARQUET_PATH = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)
 PARQUET_PATH = "%s/pcn.parquet" % PARQUET_PATH
 

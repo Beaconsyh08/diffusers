@@ -30,8 +30,8 @@ def center_crop_resize(image_path, output_dir):
     image.save(output_path)
 
 if __name__ == '__main__':
-    input_dir = '/mnt/ve_share/generation/data/train/diffusions/lsu_combine/imgs'
-    output_dir = '/mnt/ve_share/generation/data/train/diffusions/lsu_combine/512'
+    input_dir = '/mnt/ve_share/songyuhao/generation/data/train/diffusions/lsu_combine/imgs'
+    output_dir = '/mnt/ve_share/songyuhao/generation/data/train/diffusions/lsu_combine/512'
     os.makedirs(output_dir, exist_ok=True)
 
     image_paths = random.sample([os.path.join(input_dir, filename) for filename in os.listdir(input_dir)], k=7768)

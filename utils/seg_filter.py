@@ -11,11 +11,11 @@ IMAGE_DIR = "/mnt/share_disk/syh/data/train/diffusions/10w_512/imgs_blip"
 NEW_DIR_INS = "/mnt/share_disk/syh/data/train/diffusions/selected/ins_20k"
 NEW_DIR_CLS = "/mnt/share_disk/syh/data/train/diffusions/selected/cls_20k"
 
-# DICT_DIR = "/mnt/ve_share/generation/data/train/diffusions/5000/dict"
-# PMPS_DIR = "/mnt/ve_share/generation/data/train/diffusions/5000/pmps"
-# IMAGE_DIR = "/mnt/ve_share/generation/data/train/diffusions/5000/imgs"
-# RES_DIR = "/mnt/ve_share/generation/data/train/diffusions/5000/pmps_seg_test555"
-# NEW_DIR_INS = "/mnt/ve_share/generation/data/train/diffusions/5000/new"
+# DICT_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/5000/dict"
+# PMPS_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/5000/pmps"
+# IMAGE_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/5000/imgs"
+# RES_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/5000/pmps_seg_test555"
+# NEW_DIR_INS = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/5000/new"
 
 
 
@@ -149,8 +149,8 @@ for _, _, files in os.walk(PMPS_DIR):
         coor_name = stem_name.split("-")[-1]
         name_dic[coor_name] = stem_name
 
-DICT_DIR = "/mnt/ve_share/generation/data/train/diffusions/lsu/lsu_combine/dict"
-NEW_DIR = "/mnt/ve_share/generation/data/train/diffusions/lsu"
+DICT_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/lsu/lsu_combine/dict"
+NEW_DIR = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/lsu"
 
         
 for short_name in list(name_dic.keys()):

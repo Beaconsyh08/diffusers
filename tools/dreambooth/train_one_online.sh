@@ -40,12 +40,12 @@ echo "$BATCH_SIZE"
 
 accelerate config default
 export DATA_NAME="haomo"
-export MODEL_NAME="/mnt/ve_share/generation/models/online/diffusions/base/stable-diffusion-2-1"
+export MODEL_NAME="/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/stable-diffusion-2-1"
 # export INSTANCE_DIR="./data/train/finetune/$DATA_NAME"
-# export INSTANCE_DIR="/share/generation/data/train/diffusions/5000/imgs"
-# export OUTPUT_DIR="/share/generation/models/online/diffusions/res/finetune/dreambooth/${DATA_NAME}_5000_seg1"
+# export INSTANCE_DIR="/share/songyuhao/generation/data/train/diffusions/5000/imgs"
+# export OUTPUT_DIR="/share/songyuhao/generation/models/online/diffusions/res/finetune/dreambooth/${DATA_NAME}_5000_seg1"
 # # export CLASS_DIR="./data/train/finetune/night_class"
-# export INSTANCE_PROMPT="/share/generation/data/train/diffusions/5000/pmps_seg_test1"
+# export INSTANCE_PROMPT="/share/songyuhao/generation/data/train/diffusions/5000/pmps_seg_test1"
 
 accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth.py \
   --pretrained_model_name_or_path=$MODEL_NAME  \
@@ -69,7 +69,7 @@ accelerate launch --multi_gpu ./examples/dreambooth/train_dreambooth.py \
 #   --use_8bit_adam \
 
 
-#  ./tools/dreambooth/train_one_online.sh -i /share/generation/data/train/diffusions/5000/imgs -p /share/generation/data/train/diffusions/5000/pmps_seg_test1 -o /share/generation/models/online/diffusions/res/finetune/dreambooth/haomo_5000_seg1_ttt
+#  ./tools/dreambooth/train_one_online.sh -i /share/songyuhao/generation/data/train/diffusions/5000/imgs -p /share/songyuhao/generation/data/train/diffusions/5000/pmps_seg_test1 -o /share/songyuhao/generation/models/online/diffusions/res/finetune/dreambooth/haomo_5000_seg1_ttt
 # pip install safetensors
 # python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
 # cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors

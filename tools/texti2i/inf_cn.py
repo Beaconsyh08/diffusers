@@ -1,13 +1,16 @@
 import PIL
 import torch
-from diffusers import StableDiffusionInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel
+from diffusers import StableDiffusionInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel, ControlNetModel
+from diffusers.pipelines.controlnet import StableDiffusionControlNetImg2ImgPipeline
 import os
 import cv2
 from tqdm import tqdm
 import numpy as np
+import cv2
+from PIL import Image
+import numpy as np
 from transformers import CLIPTextModel
-
-
+from diffusers.utils import load_image
 
 def preprocess_image(url):
     # image = PIL.Image.open(requests.get(url, stream=True).raw)
@@ -19,18 +22,34 @@ def preprocess_image(url):
     
     return image
 
-# prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
+
+def canny(url):
+    image = np.array(load_image(url))
+
+    low_threshold = 100
+    high_threshold = 200
+
+    image = cv2.Canny(image, low_threshold, high_threshold)
+    image = image[:, :, None]
+    image = np.concatenate([image, image, image], axis=2)
+    canny_image = Image.fromarray(image)
+    return canny_image
+    
+    
+controlnet_path_canny = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/control_v11p_sd15_canny"
+controlnet = ControlNetModel.from_pretrained(controlnet_path_canny, torch_dtype=torch.float16).to("cuda")
+
+contorlnet_scale = 0.1
+    
 prompts = ["make it night", "make it rainy", "make it snowy"]
 
-# prompts = ["make it rainy"]
-# model_names = ["INS-Base", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
-# model_names = ["INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.2.0", "INS-HM-V0.1.0/checkpoint-5000", "INS-HM-V0.1.0/checkpoint-10000", "INS-HM-V0.1.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-5000", "INS-HM-V0.2.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-20000", "INS-HM-V0.2.0/checkpoint-25000", "INS-HM-V0.2.0/checkpoint-30000"]
-model_names = ["INS-HM-V0.3.0"]
+
+model_names = ["INS-HM-V0.1.0"]
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/prompt-to-prompt"
 combine = True
 
 test_path = '/mnt/ve_share/songyuhao/generation/data/test/v0.0'
-res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
+res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official_test"
 
 # test_path = '/mnt/ve_share/songyuhao/generation/data/test/kl/'
 # res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/casual"
@@ -58,11 +77,12 @@ for ind, model_name in enumerate(model_names):
     if "/" in model_name:
         unet = UNet2DConditionModel.from_pretrained("%s/unet_ema" % model_id)
         model_id_true = "/".join(model_id.split("/")[:-1])
-        pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id_true, unet=unet).to("cuda")
+        model_id_true = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/stable-diffusion-v1-5"
+        pipe = StableDiffusionControlNetImg2ImgPipeline.from_pretrained(model_id_true, controlnet=controlnet, torch_dtype=torch.float16).to("cuda")
         
     else:
-        pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
-    # pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
+        model_id = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/stable-diffusion-v1-5"
+        pipe = StableDiffusionControlNetImg2ImgPipeline.from_pretrained(model_id, controlnet=controlnet, torch_dtype=torch.float16).to("cuda")
     
     for prompt in prompts:
         print(prompt)
@@ -79,7 +99,8 @@ for ind, model_name in enumerate(model_names):
         
         for i, image_path in tqdm(enumerate(image_paths), total=len(image_paths)):
             test_image = preprocess_image(image_path)
-            image = pipe(prompt, image=test_image, num_inference_steps=50, image_guidance_scale=1.5, guidance_scale=7).images[0]
+            control_image = canny(image_path)
+            image = pipe(prompt=prompt, image=test_image, control_image=control_image, num_inference_steps=50).images[0]
             res_id = "%s/%d.png" % (res_dir_p, i)
             
             if combine:

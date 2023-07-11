@@ -1,6 +1,6 @@
-export MODEL_NAME="/mnt/ve_share/generation/models/online/diffusions/base/instruct-pix2pix"
-export DATASET_ID="/mnt/ve_share/generation/data/train/diffusions/parquet/replace_blend_reweight_snowy_0.80_0.80_2.00_1000"
-export OUTPUT_DIR="/mnt/ve_share/generation/models/online/diffusions/res/instruct-pix2pix-test"
+export MODEL_NAME="/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
+export DATASET_ID="/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/replace_blend_reweight_snowy_0.80_0.80_2.00_1000"
+export OUTPUT_DIR="/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instruct-pix2pix-test"
 
 accelerate launch --mixed_precision="fp16" --multi_gpu ./examples/instruct_pix2pix/train_instruct_pix2pix.py \
  --pretrained_model_name_or_path=$MODEL_NAME \

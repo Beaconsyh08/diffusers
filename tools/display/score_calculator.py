@@ -2,8 +2,8 @@ from collections import defaultdict
 import os
 import pandas as pd
 
-root_path = "/mnt/ve_share/generation/records/txt"
-save_path = "/mnt/ve_share/generation/records/xlsx"
+root_path = "/mnt/ve_share/songyuhao/generation/records/txt"
+save_path = "/mnt/ve_share/songyuhao/generation/records/xlsx"
 
 selected_user = "syh"
 
