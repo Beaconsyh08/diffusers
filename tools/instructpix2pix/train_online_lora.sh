@@ -8,22 +8,26 @@ helpFunction()
    echo -e "\t-o Description of what is OUTPUT_DIR"
    echo -e "\t-t Description of what is ITER"
    echo -e "\t-b Description of what is BATCH_SIZE"
+   echo -e "\t-r Description of what is RANK"
+   echo -e "\t-l Description of what is LR"
    exit 1 # Exit script after printing help
 }
 
-while getopts "d:o:t:b:" opt
+while getopts "d:o:t:b:r:l:" opt
 do
    case "$opt" in
       d ) DATASET_ID="$OPTARG" ;;
       o ) OUTPUT_DIR="$OPTARG" ;;
       t ) ITER="$OPTARG" ;;
       b ) BATCH_SIZE="$OPTARG" ;;
+      r ) RANK="$OPTARG" ;;
+      l ) LR="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 
 # Print helpFunction in case parameters are empty
-if [ -z "$DATASET_ID" ] || [ -z "$OUTPUT_DIR" ] || [ -z "$ITER" ] || [ -z "$BATCH_SIZE" ]
+if [ -z "$DATASET_ID" ] || [ -z "$OUTPUT_DIR" ] || [ -z "$ITER" ] || [ -z "$BATCH_SIZE" ] || [ -z "$RANK" ] || [ -z "$LR" ]
 then
    echo "Some or all of the parameters are empty";
    helpFunction
@@ -34,6 +38,9 @@ echo "$DATASET_ID"
 echo "$OUTPUT_DIR"
 echo "$ITER"
 echo "$BATCH_SIZE"
+echo "$RANK"
+echo "$LR"
+
 
 export MODEL_NAME="/share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
 
@@ -46,9 +53,10 @@ accelerate launch --multi_gpu ./examples/instruct_pix2pix/train_instruct_pix2pix
  --max_train_steps=$ITER \
  --train_batch_size=$BATCH_SIZE \
  --checkpointing_steps=100 \
- --learning_rate=5e-05 --lr_warmup_steps=0 \
+ --learning_rate=$LR --lr_warmup_steps=0 \
  --conditioning_dropout_prob=0.05 \
  --seed=42 \
+ --rank=$RANK \
  --output_dir=$OUTPUT_DIR
 
 

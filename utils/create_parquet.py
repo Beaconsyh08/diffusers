@@ -4,7 +4,9 @@ import os
 from tqdm import tqdm
 
 # P2P + ControlNet
-P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_controlnet/index.txt"  
+# P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_controlnet/index.txt"  
+P2P_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn_human.txt"  
+
 
 # P2P
 # P2P_PATH = "tos://haomo-public/lucas-generation/syh/train/instructpix2pix/index.txt"
@@ -16,7 +18,7 @@ TYPE = "txt"
 ONLINE = True
 
 PARA = "0.80_0.80_2.00"
-SIZE = 100
+SIZE = 50
 STREET = False
 PARQUET_PATH = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)
