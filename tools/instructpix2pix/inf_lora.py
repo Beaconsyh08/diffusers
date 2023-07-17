@@ -20,7 +20,7 @@ def preprocess_image(url):
 
 model_base = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
 prompts = ["make it night"]
-lora_names = ["INS-HM-LORA-NIGHT-V0.0.0/checkpoint-2000", "INS-HM-LORA-NIGHT-V0.0.0/checkpoint-5000", "INS-HM-LORA-NIGHT-V0.0.0/checkpoint-10000",  "INS-HM-LORA-NIGHT-V0.1.0", "INS-HM-LORA-NIGHT-V0.1.0/checkpoint-2500", "INS-HM-LORA-NIGHT-V0.1.0/checkpoint-5000"]
+lora_names = ["INS-HM-LORA-NIGHT-V0.1.4/checkpoint-5000"]
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/lora"
 combine = True
 
