@@ -2,11 +2,12 @@ import pandas as pd
 import random
 import os
 from tqdm import tqdm
+import json
 
 P2P_PATH = "/mnt/share_disk/syh/data/prompt_to_prompt/index.txt"
 SCENE = "all"
 PARA = "0.80_0.80_2.00"
-SIZE = 100
+SIZE = 1000
 PARQUET_PATH = "/mnt/ve_share/generation/data/train/diffusions/parquet/%s_%s_%d_cn"  % (SCENE, PARA, SIZE*4)
 os.makedirs(PARQUET_PATH, exist_ok=True)
 PARQUET_PATH = "%s/pcn.parquet" % PARQUET_PATH
@@ -15,6 +16,9 @@ FOLDER_PATH = "/mnt/ve_share/generation/data/p2p_cn/imgs"
 TYPE = "folder"
 ONLINE = True
 
+WHITE_PATH = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/filtered/%s_%s_%s.json" % (SCENE, PARA, SIZE)
+print(WHITE_PATH)
+WHITE_FILTER = True
 
 def prepare(input_image, edited_image, SIZE, scene):
     final_input_image, final_edited_image =[], []
@@ -65,7 +69,15 @@ elif TYPE == "folder":
 # -4: scene
 # -3: id
 # -2: parameter
+if WHITE_FILTER:
+    with open(WHITE_PATH) as white_file:
+        white_json = json.load(white_file)
+        white_ids = [_["id"] for _ in white_json]
+    ori_lens = len(paths)
 
+    paths = [_ for _ in paths if int(_[-3]) in white_ids]
+    print(ori_lens, len(paths))
+    
 edited_image_night, input_image_night, edited_image_snowy, input_image_snowy, edited_image_rainy, input_image_rainy, edited_image_foggy, input_image_foggy = [], [], [], [], [], [], [], []
 for path in tqdm(paths):
     mode = path[-5]

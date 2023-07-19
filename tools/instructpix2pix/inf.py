@@ -19,14 +19,15 @@ def preprocess_image(url):
     
     return image
 
-# prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
-prompts = ["make it night", "make it rainy", "make it snowy"]
+prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
+# prompts = ["make it night"]
 
 # prompts = ["make it rainy"]
 # model_names = ["INS-Base", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
-# model_names = ["INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.2.0", "INS-HM-V0.1.0/checkpoint-5000", "INS-HM-V0.1.0/checkpoint-10000", "INS-HM-V0.1.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-5000", "INS-HM-V0.2.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-20000", "INS-HM-V0.2.0/checkpoint-25000", "INS-HM-V0.2.0/checkpoint-30000"]
-model_names = ["INS-HM-V0.3.0"]
-model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/"
+model_names = ["INS-HM-NIGHT-V0.2.0", ]
+# "INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.2.0", "INS-HM-V0.1.0/checkpoint-5000", "INS-HM-V0.1.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-5000", "INS-HM-V0.2.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-20000", "INS-HM-V0.2.0/checkpoint-25000", "INS-HM-V0.2.0/checkpoint-30000"]
+# model_names = ["INS-HM-HUMAN-50"]
+model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
 combine = True
 
 test_path = '/mnt/ve_share/songyuhao/generation/data/test/v0.0'

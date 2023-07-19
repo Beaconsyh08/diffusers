@@ -1,28 +1,31 @@
 import pandas as pd
 import random
 import os
+import json
 from tqdm import tqdm
 
 # P2P + ControlNet
-# P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_controlnet/index.txt"  
-P2P_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn_human.txt"  
+P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_controlnet/index.txt"  
+# P2P_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn_human.txt"  
 
 
 # P2P
 # P2P_PATH = "tos://haomo-public/lucas-generation/syh/train/instructpix2pix/index.txt"
-
-MODE = "replace_blend_reweight"
-SCENE = "night"
+SCENE = "foggy"
+MODE = "replace_blend_reweight" if SCENE != "snowy" else "refine_blend_reweight"
 FOLDER_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn/imgs/%s/%s" % (MODE, SCENE)
 TYPE = "txt"
 ONLINE = True
 
 PARA = "0.80_0.80_2.00"
-SIZE = 50
+SIZE = 8000
 STREET = False
-PARQUET_PATH = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn" % (MODE, SCENE, PARA, SIZE)
+PARQUET_PATH = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn_filtered" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)
 PARQUET_PATH = "%s/pcn.parquet" % PARQUET_PATH
+WHITE_PATH = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/filtered/%s_%s_%s_%s.json" % (MODE, SCENE, PARA, SIZE)
+print(WHITE_PATH)
+WHITE_FILTER = True
 
 if TYPE == "txt":
     with open (P2P_PATH, "r") as input_file:
@@ -52,6 +55,14 @@ elif TYPE == "folder":
 # -4: scene
 # -3: id
 # -2: parameter
+if WHITE_FILTER:
+    with open(WHITE_PATH) as white_file:
+        white_json = json.load(white_file)
+        white_ids = [_["id"] for _ in white_json]
+    ori_lens = len(paths)
+
+    paths = [_ for _ in paths if int(_[-3]) in white_ids]
+    print(ori_lens, len(paths))
 
 input_image, edited_image = [], []
 for path in tqdm(paths):

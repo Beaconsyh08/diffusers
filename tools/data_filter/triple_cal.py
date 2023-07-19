@@ -8,13 +8,13 @@ import json
 import torch.nn.functional as F
 from tqdm import tqdm
 
-scene = "night"
+scene = "foggy"
 clip_path = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/clip-vit-base-patch16"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 root = "/mnt/ve_share/songyuhao/generation/data/p2p_cn"
-root_json = "%s/ori_jsons/%s_replace.json" % (root, scene)
+root_json = "%s/ori_jsons/%s_replace.json" % (root, scene) if scene != "snowy" else "%s/ori_jsons/%s_refine_street.json" % (root, scene)
 root_img = "replace_blend_reweight/%s" % scene if scene != "snowy" else "refine_blend_reweight/%s" % scene
-root_co = "0.80_0.80_2.00"
+root_co = "0.80_0.80_2.00" 
 length = "all"
 save_json_path = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/ori/%s_%s_%s.json" % (root_img.replace("/", "_"), root_co, length)
 
@@ -65,4 +65,4 @@ with torch.no_grad():
     
     with open(save_json_path, "w") as json_file:
         json.dump(result, json_file)
-    print(save_json_path)
+    # print(save_json_path)

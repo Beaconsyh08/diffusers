@@ -2,11 +2,11 @@ from tqdm import tqdm
 import json
 
 
-scene = "night"
+scene = "foggy"
 co = "0.80_0.80_2.00"
-length = "20"
+length = "all"
 result_json = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/ori/replace_blend_reweight_%s_%s_%s.json" % (scene, co, length) if scene != "snowy" else "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/ori/refine_blend_reweight_%s_%s_%s.json" % (scene, co, length)
-topk = 100
+topk = 8000
 
 black_ids = []
 with open(result_json) as json_res:
@@ -24,8 +24,10 @@ with open(result_json) as json_res:
             
 white_res_sorted = [_ for _ in res_sorted if _["id"] not in black_ids][:topk]
 print("Pass Ratio: ", (1 - round(len(black_ids)/ len(res_sorted), 4)) * 100)
+print(white_res_sorted[0])
+print(white_res_sorted[-1])
 
-new_result_json = result_json.replace("ori", "filtered").replace(".json", "_%d.json" % min(topk, len(white_res_sorted)))
+new_result_json = result_json.replace("ori", "filtered").replace("_%s.json" % length, "_%d.json" % min(topk, len(white_res_sorted)))
 with open(new_result_json, "w") as json_file:
     json.dump(white_res_sorted, json_file)
 print(new_result_json)
