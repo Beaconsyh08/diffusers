@@ -24,8 +24,8 @@ prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "ma
 
 # prompts = ["make it rainy"]
 # model_names = ["INS-Base", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
-model_names = ["INS-HM-NIGHT-V0.2.0", ]
-# "INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.2.0", "INS-HM-V0.1.0/checkpoint-5000", "INS-HM-V0.1.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-5000", "INS-HM-V0.2.0/checkpoint-10000", "INS-HM-V0.2.0/checkpoint-15000", "INS-HM-V0.2.0/checkpoint-20000", "INS-HM-V0.2.0/checkpoint-25000", "INS-HM-V0.2.0/checkpoint-30000"]
+model_names = ["INS-HM-V0.4.0", "INS-HM-V0.4.0/checkpoint-2500", "INS-HM-V0.4.0/checkpoint-5000", "INS-HM-V0.4.0/checkpoint-7500", "INS-HM-V0.4.0/checkpoint-10000", "INS-HM-V0.4.0/checkpoint-12500", 
+               "INS-HM-V0.5.0", "INS-HM-V0.5.0/checkpoint-2500", "INS-HM-V0.5.0/checkpoint-5000", "INS-HM-V0.5.0/checkpoint-7500", "INS-HM-V0.5.0/checkpoint-10000", "INS-HM-V0.5.0/checkpoint-12500"]
 # model_names = ["INS-HM-HUMAN-50"]
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
 combine = True
@@ -64,6 +64,8 @@ for ind, model_name in enumerate(model_names):
     else:
         pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
     # pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
+    
+    pipe.safety_checker = lambda images, **kwargs: (images, [False] * len(images))
     
     for prompt in prompts:
         print(prompt)

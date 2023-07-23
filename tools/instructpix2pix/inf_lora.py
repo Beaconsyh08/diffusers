@@ -1,11 +1,13 @@
-import PIL
-import torch
-from diffusers import StableDiffusionInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel
 import os
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
+import PIL
+from diffusers import StableDiffusionInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel
 import cv2
 from tqdm import tqdm
 import numpy as np
 from transformers import CLIPTextModel
+import torch
 
 
 def preprocess_image(url):
@@ -20,7 +22,7 @@ def preprocess_image(url):
 
 model_base = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
 prompts = ["make it night"]
-lora_names = ["INS-HM-LORA-NIGHT-V0.2.0", "INS-HM-LORA-NIGHT-V0.2.0/checkpoint-5000", "INS-HM-LORA-NIGHT-V0.2.0/checkpoint-10000", "INS-HM-LORA-NIGHT-V0.2.0/checkpoint-15000", ]
+lora_names = ["INS-HM-LORA-NIGHT-V0.3.0", "INS-HM-LORA-NIGHT-V0.3.0/checkpoint-5000", "INS-HM-LORA-NIGHT-V0.3.0/checkpoint-10000", "INS-HM-LORA-NIGHT-V0.3.0/checkpoint-15000", ]
             #   "INS-HM-LORA-NIGHT-V0.1.2",  "INS-HM-LORA-NIGHT-V0.1.2/checkpoint-5000", "INS-HM-LORA-NIGHT-V0.1.2/checkpoint-10000", "INS-HM-LORA-NIGHT-V0.1.2/checkpoint-15000", 
             #   "INS-HM-LORA-NIGHT-V0.1.3",  "INS-HM-LORA-NIGHT-V0.1.3/checkpoint-5000", "INS-HM-LORA-NIGHT-V0.1.3/checkpoint-10000", "INS-HM-LORA-NIGHT-V0.1.3/checkpoint-15000", 
             #   "INS-HM-LORA-NIGHT-V0.1.4",  "INS-HM-LORA-NIGHT-V0.1.4/checkpoint-5000", "INS-HM-LORA-NIGHT-V0.1.4/checkpoint-10000", "INS-HM-LORA-NIGHT-V0.1.4/checkpoint-15000", ]
