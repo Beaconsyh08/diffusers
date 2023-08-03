@@ -2,11 +2,11 @@ from tqdm import tqdm
 import json
 
 
-scene = "foggy"
+scene = "night"
 co = "0.80_0.80_2.00"
 length = "all"
 result_json = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/ori/replace_blend_reweight_%s_%s_%s.json" % (scene, co, length) if scene != "snowy" else "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/ori/refine_blend_reweight_%s_%s_%s.json" % (scene, co, length)
-topk = 8000
+topk = 500
 
 black_ids = []
 with open(result_json) as json_res:

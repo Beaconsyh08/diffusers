@@ -11,14 +11,14 @@ P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_control
 
 # P2P
 # P2P_PATH = "tos://haomo-public/lucas-generation/syh/train/instructpix2pix/index.txt"
-SCENE = "foggy"
+SCENE = "night"
 MODE = "replace_blend_reweight" if SCENE != "snowy" else "refine_blend_reweight"
 FOLDER_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn/imgs/%s/%s" % (MODE, SCENE)
-TYPE = "txt"
+TYPE = "folder"
 ONLINE = True
 
-PARA = "0.80_0.80_2.00"
-SIZE = 8000
+PARA = "0.70_0.70_2.00"
+SIZE = 500
 STREET = False
 PARQUET_PATH = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn_filtered" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)
@@ -35,7 +35,7 @@ if TYPE == "txt":
 elif TYPE == "folder":
     paths = []
     # Iterate over the files in the folder
-    for root, dirs, files in os.walk(FOLDER_PATH):
+    for root, dirs, files in tqdm(os.walk(FOLDER_PATH)):
         for file in files:
             # Get the full path of the file
             file_path = os.path.join(root, file)

@@ -19,22 +19,20 @@ def preprocess_image(url):
     
     return image
 
-prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
-# prompts = ["make it night"]
+# prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
+prompts = ["make it snowy"]
 
-# prompts = ["make it rainy"]
-# model_names = ["INS-Base", "INS-HM-NIGHT-V0.0.0", "INS-HM-NIGHT-V0.0.1", "INS-HM-NIGHT-V0.1.0"]
-model_names = ["INS-HM-V0.4.0", "INS-HM-V0.4.0/checkpoint-2500", "INS-HM-V0.4.0/checkpoint-5000", "INS-HM-V0.4.0/checkpoint-7500", "INS-HM-V0.4.0/checkpoint-10000", "INS-HM-V0.4.0/checkpoint-12500", 
-               "INS-HM-V0.5.0", "INS-HM-V0.5.0/checkpoint-2500", "INS-HM-V0.5.0/checkpoint-5000", "INS-HM-V0.5.0/checkpoint-7500", "INS-HM-V0.5.0/checkpoint-10000", "INS-HM-V0.5.0/checkpoint-12500"]
-# model_names = ["INS-HM-HUMAN-50"]
-model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
+# "INS-HM-SNOWY-V0.3.0", "INS-HM-SNOWY-V0.3.0/checkpoint-2500", "INS-HM-SNOWY-V0.3.0/checkpoint-5000", "INS-HM-SNOWY-V0.3.0/checkpoint-7500", "INS-HM-SNOWY-V0.3.0/checkpoint-10000", "INS-HM-SNOWY-V0.3.0/checkpoint-12500"
+model_names = [
+               "INS-HM-SNOWY-V0.4.0", "INS-HM-SNOWY-V0.4.0/checkpoint-2500", "INS-HM-SNOWY-V0.4.0/checkpoint-5000", "INS-HM-SNOWY-V0.4.0/checkpoint-7500", "INS-HM-SNOWY-V0.4.0/checkpoint-10000", "INS-HM-SNOWY-V0.4.0/checkpoint-12500"]
+
+# model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
+model_dir = "/mnt/share_disk/songyuhao/models/online/diffusions/res/instructpix2pix/model"
+
 combine = True
 
 test_path = '/mnt/ve_share/songyuhao/generation/data/test/v0.0'
 res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
-
-# test_path = '/mnt/ve_share/songyuhao/generation/data/test/kl/'
-# res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/casual"
 
 image_paths = []
 for foldername, subfolders, filenames in os.walk(test_path):
