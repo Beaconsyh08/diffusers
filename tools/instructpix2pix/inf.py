@@ -20,14 +20,14 @@ def preprocess_image(url):
     return image
 
 # prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
-prompts = ["make it snowy"]
+prompts = ["make it night"]
 
 # "INS-HM-SNOWY-V0.3.0", "INS-HM-SNOWY-V0.3.0/checkpoint-2500", "INS-HM-SNOWY-V0.3.0/checkpoint-5000", "INS-HM-SNOWY-V0.3.0/checkpoint-7500", "INS-HM-SNOWY-V0.3.0/checkpoint-10000", "INS-HM-SNOWY-V0.3.0/checkpoint-12500"
 model_names = [
-               "INS-HM-SNOWY-V0.4.0", "INS-HM-SNOWY-V0.4.0/checkpoint-2500", "INS-HM-SNOWY-V0.4.0/checkpoint-5000", "INS-HM-SNOWY-V0.4.0/checkpoint-7500", "INS-HM-SNOWY-V0.4.0/checkpoint-10000", "INS-HM-SNOWY-V0.4.0/checkpoint-12500"]
+               "INS-HM-NIGHT-V0.4.2", "INS-HM-NIGHT-V0.4.2/checkpoint-2500", "INS-HM-NIGHT-V0.4.2/checkpoint-5000", "INS-HM-NIGHT-V0.4.2/checkpoint-7500", "INS-HM-NIGHT-V0.4.2/checkpoint-10000", "INS-HM-NIGHT-V0.4.2/checkpoint-12500"]
 
-# model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
-model_dir = "/mnt/share_disk/songyuhao/models/online/diffusions/res/instructpix2pix/model"
+model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
+# model_dir = "/mnt/share_disk/songyuhao/models/online/diffusions/res/instructpix2pix/model"
 
 combine = True
 
