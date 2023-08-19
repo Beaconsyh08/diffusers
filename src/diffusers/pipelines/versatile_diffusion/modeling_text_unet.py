@@ -18,6 +18,9 @@ from ...models.attention_processor import (
 from ...models.dual_transformer_2d import DualTransformer2DModel
 from ...models.embeddings import (
     GaussianFourierProjection,
+    ImageHintTimeEmbedding,
+    ImageProjection,
+    ImageTimeEmbedding,
     TextImageProjection,
     TextImageTimeEmbedding,
     TextTimeEmbedding,
@@ -150,6 +153,62 @@ def get_up_block(
     raise ValueError(f"{up_block_type} is not supported.")
 
 
+class FourierEmbedder(nn.Module):
+    def __init__(self, num_freqs=64, temperature=100):
+        super().__init__()
+
+        self.num_freqs = num_freqs
+        self.temperature = temperature
+
+        freq_bands = temperature ** (torch.arange(num_freqs) / num_freqs)
+        freq_bands = freq_bands[None, None, None]
+        self.register_buffer("freq_bands", freq_bands, persistent=False)
+
+    def __call__(self, x):
+        x = self.freq_bands * x.unsqueeze(-1)
+        return torch.stack((x.sin(), x.cos()), dim=-1).permute(0, 1, 3, 4, 2).reshape(*x.shape[:2], -1)
+
+
+class PositionNet(nn.Module):
+    def __init__(self, positive_len, out_dim, fourier_freqs=8):
+        super().__init__()
+        self.positive_len = positive_len
+        self.out_dim = out_dim
+
+        self.fourier_embedder = FourierEmbedder(num_freqs=fourier_freqs)
+        self.position_dim = fourier_freqs * 2 * 4  # 2: sin/cos, 4: xyxy
+
+        if isinstance(out_dim, tuple):
+            out_dim = out_dim[0]
+        self.linears = nn.Sequential(
+            nn.Linear(self.positive_len + self.position_dim, 512),
+            nn.SiLU(),
+            nn.Linear(512, 512),
+            nn.SiLU(),
+            nn.Linear(512, out_dim),
+        )
+
+        self.null_positive_feature = torch.nn.Parameter(torch.zeros([self.positive_len]))
+        self.null_position_feature = torch.nn.Parameter(torch.zeros([self.position_dim]))
+
+    def forward(self, boxes, masks, positive_embeddings):
+        masks = masks.unsqueeze(-1)
+
+        # embedding position (it may includes padding as placeholder)
+        xyxy_embedding = self.fourier_embedder(boxes)  # B*N*4 -> B*N*C
+
+        # learnable null embedding
+        positive_null = self.null_positive_feature.view(1, 1, -1)
+        xyxy_null = self.null_position_feature.view(1, 1, -1)
+
+        # replace padding with learnable null embedding
+        positive_embeddings = positive_embeddings * masks + (1 - masks) * positive_null
+        xyxy_embedding = xyxy_embedding * masks + (1 - masks) * xyxy_null
+
+        objs = self.linears(torch.cat([positive_embeddings, xyxy_embedding], dim=-1))
+        return objs
+
+
 # Copied from diffusers.models.unet_2d_condition.UNet2DConditionModel with UNet2DConditionModel->UNetFlatConditionModel, nn.Conv2d->LinearMultiDim, Block2D->BlockFlat
 class UNetFlatConditionModel(ModelMixin, ConfigMixin):
     r"""
@@ -189,7 +248,11 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         norm_eps (`float`, *optional*, defaults to 1e-5): The epsilon to use for the normalization.
         cross_attention_dim (`int` or `Tuple[int]`, *optional*, defaults to 1280):
             The dimension of the cross attention features.
-        encoder_hid_dim (`int`, *optional*, defaults to `None`):
+        transformer_layers_per_block (`int` or `Tuple[int]`, *optional*, defaults to 1):
+            The number of transformer blocks of type [`~models.attention.BasicTransformerBlock`]. Only relevant for
+            [`~models.unet_2d_blocks.CrossAttnDownBlockFlat`], [`~models.unet_2d_blocks.CrossAttnUpBlockFlat`],
+            [`~models.unet_2d_blocks.UNetMidBlockFlatCrossAttn`].
+        encoder_hid_dim (`int`, *optional*, defaults to None):
             If `encoder_hid_dim_type` is defined, `encoder_hidden_states` will be projected from `encoder_hid_dim`
             dimension to `cross_attention_dim`.
         encoder_hid_dim_type (`str`, *optional*, defaults to `None`):
@@ -206,6 +269,8 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         addition_embed_type (`str`, *optional*, defaults to `None`):
             Configures an optional embedding which will be summed with the time embeddings. Choose from `None` or
             "text". "text" will use the `TextTimeEmbedding` layer.
+        addition_time_embed_dim: (`int`, *optional*, defaults to `None`):
+            Dimension for the timestep embeddings.
         num_class_embeds (`int`, *optional*, defaults to `None`):
             Input dimension of the learnable embedding matrix to be projected to `time_embed_dim`, when performing
             class conditioning with `class_embed_type` equal to `None`.
@@ -266,6 +331,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         norm_num_groups: Optional[int] = 32,
         norm_eps: float = 1e-5,
         cross_attention_dim: Union[int, Tuple[int]] = 1280,
+        transformer_layers_per_block: Union[int, Tuple[int]] = 1,
         encoder_hid_dim: Optional[int] = None,
         encoder_hid_dim_type: Optional[str] = None,
         attention_head_dim: Union[int, Tuple[int]] = 8,
@@ -274,6 +340,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         use_linear_projection: bool = False,
         class_embed_type: Optional[str] = None,
         addition_embed_type: Optional[str] = None,
+        addition_time_embed_dim: Optional[int] = None,
         num_class_embeds: Optional[int] = None,
         upcast_attention: bool = False,
         resnet_time_scale_shift: str = "default",
@@ -287,6 +354,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         conv_in_kernel: int = 3,
         conv_out_kernel: int = 3,
         projection_class_embeddings_input_dim: Optional[int] = None,
+        attention_type: str = "default",
         class_embeddings_concat: bool = False,
         mid_block_only_cross_attention: Optional[bool] = None,
         cross_attention_norm: Optional[str] = None,
@@ -295,6 +363,14 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         super().__init__()
 
         self.sample_size = sample_size
+
+        if num_attention_heads is not None:
+            raise ValueError(
+                "At the moment it is not possible to define the number of attention heads via `num_attention_heads`"
+                " because of a naming issue as described in"
+                " https://github.com/huggingface/diffusers/issues/2011#issuecomment-1547958131. Passing"
+                " `num_attention_heads` will only be supported in diffusers v0.19."
+            )
 
         # If `num_attention_heads` is not defined (which is the case for most models)
         # it will default to `attention_head_dim`. This looks weird upon first reading it and it is.
@@ -401,7 +477,12 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
                 image_embed_dim=cross_attention_dim,
                 cross_attention_dim=cross_attention_dim,
             )
-
+        elif encoder_hid_dim_type == "image_proj":
+            # Kandinsky 2.2
+            self.encoder_hid_proj = ImageProjection(
+                image_embed_dim=encoder_hid_dim,
+                cross_attention_dim=cross_attention_dim,
+            )
         elif encoder_hid_dim_type is not None:
             raise ValueError(
                 f"encoder_hid_dim_type: {encoder_hid_dim_type} must be None, 'text_proj' or 'text_image_proj'."
@@ -454,6 +535,15 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
             self.add_embedding = TextImageTimeEmbedding(
                 text_embed_dim=cross_attention_dim, image_embed_dim=cross_attention_dim, time_embed_dim=time_embed_dim
             )
+        elif addition_embed_type == "text_time":
+            self.add_time_proj = Timesteps(addition_time_embed_dim, flip_sin_to_cos, freq_shift)
+            self.add_embedding = TimestepEmbedding(projection_class_embeddings_input_dim, time_embed_dim)
+        elif addition_embed_type == "image":
+            # Kandinsky 2.2
+            self.add_embedding = ImageTimeEmbedding(image_embed_dim=encoder_hid_dim, time_embed_dim=time_embed_dim)
+        elif addition_embed_type == "image_hint":
+            # Kandinsky 2.2 ControlNet
+            self.add_embedding = ImageHintTimeEmbedding(image_embed_dim=encoder_hid_dim, time_embed_dim=time_embed_dim)
         elif addition_embed_type is not None:
             raise ValueError(f"addition_embed_type: {addition_embed_type} must be None, 'text' or 'text_image'.")
 
@@ -486,6 +576,9 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         if isinstance(layers_per_block, int):
             layers_per_block = [layers_per_block] * len(down_block_types)
 
+        if isinstance(transformer_layers_per_block, int):
+            transformer_layers_per_block = [transformer_layers_per_block] * len(down_block_types)
+
         if class_embeddings_concat:
             # The time embeddings are concatenated with the class embeddings. The dimension of the
             # time embeddings passed to the down, middle, and up blocks is twice the dimension of the
@@ -504,6 +597,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
             down_block = get_down_block(
                 down_block_type,
                 num_layers=layers_per_block[i],
+                transformer_layers_per_block=transformer_layers_per_block[i],
                 in_channels=input_channel,
                 out_channels=output_channel,
                 temb_channels=blocks_time_embed_dim,
@@ -519,6 +613,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
                 only_cross_attention=only_cross_attention[i],
                 upcast_attention=upcast_attention,
                 resnet_time_scale_shift=resnet_time_scale_shift,
+                attention_type=attention_type,
                 resnet_skip_time_act=resnet_skip_time_act,
                 resnet_out_scale_factor=resnet_out_scale_factor,
                 cross_attention_norm=cross_attention_norm,
@@ -529,6 +624,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         # mid
         if mid_block_type == "UNetMidBlockFlatCrossAttn":
             self.mid_block = UNetMidBlockFlatCrossAttn(
+                transformer_layers_per_block=transformer_layers_per_block[-1],
                 in_channels=block_out_channels[-1],
                 temb_channels=blocks_time_embed_dim,
                 resnet_eps=norm_eps,
@@ -541,6 +637,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
                 dual_cross_attention=dual_cross_attention,
                 use_linear_projection=use_linear_projection,
                 upcast_attention=upcast_attention,
+                attention_type=attention_type,
             )
         elif mid_block_type == "UNetMidBlockFlatSimpleCrossAttn":
             self.mid_block = UNetMidBlockFlatSimpleCrossAttn(
@@ -570,6 +667,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         reversed_num_attention_heads = list(reversed(num_attention_heads))
         reversed_layers_per_block = list(reversed(layers_per_block))
         reversed_cross_attention_dim = list(reversed(cross_attention_dim))
+        reversed_transformer_layers_per_block = list(reversed(transformer_layers_per_block))
         only_cross_attention = list(reversed(only_cross_attention))
 
         output_channel = reversed_block_out_channels[0]
@@ -590,6 +688,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
             up_block = get_up_block(
                 up_block_type,
                 num_layers=reversed_layers_per_block[i] + 1,
+                transformer_layers_per_block=reversed_transformer_layers_per_block[i],
                 in_channels=input_channel,
                 out_channels=output_channel,
                 prev_output_channel=prev_output_channel,
@@ -605,6 +704,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
                 only_cross_attention=only_cross_attention[i],
                 upcast_attention=upcast_attention,
                 resnet_time_scale_shift=resnet_time_scale_shift,
+                attention_type=attention_type,
                 resnet_skip_time_act=resnet_skip_time_act,
                 resnet_out_scale_factor=resnet_out_scale_factor,
                 cross_attention_norm=cross_attention_norm,
@@ -629,6 +729,14 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         self.conv_out = LinearMultiDim(
             block_out_channels[0], out_channels, kernel_size=conv_out_kernel, padding=conv_out_padding
         )
+
+        if attention_type == "gated":
+            positive_len = 768
+            if isinstance(cross_attention_dim, int):
+                positive_len = cross_attention_dim
+            elif isinstance(cross_attention_dim, tuple) or isinstance(cross_attention_dim, list):
+                positive_len = cross_attention_dim[0]
+            self.position_net = PositionNet(positive_len=positive_len, out_dim=cross_attention_dim)
 
     @property
     def attn_processors(self) -> Dict[str, AttentionProcessor]:
@@ -760,7 +868,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
             fn_recursive_set_attention_slice(module, reversed_slice_size)
 
     def _set_gradient_checkpointing(self, module, value=False):
-        if isinstance(module, (CrossAttnDownBlockFlat, DownBlockFlat, CrossAttnUpBlockFlat, UpBlockFlat)):
+        if hasattr(module, "gradient_checkpointing"):
             module.gradient_checkpointing = value
 
     def forward(
@@ -796,6 +904,9 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
                 tuple.
             cross_attention_kwargs (`dict`, *optional*):
                 A kwargs dictionary that if specified is passed along to the [`AttnProcessor`].
+            added_cond_kwargs: (`dict`, *optional*):
+                A kwargs dictionary containin additional embeddings that if specified are added to the embeddings that
+                are passed along to the UNet blocks.
 
         Returns:
             [`~models.unet_2d_condition.UNet2DConditionOutput`] or `tuple`:
@@ -866,6 +977,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
         t_emb = t_emb.to(dtype=sample.dtype)
 
         emb = self.time_embedding(t_emb, timestep_cond)
+        aug_emb = None
 
         if self.class_embedding is not None:
             if class_labels is None:
@@ -887,9 +999,8 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
 
         if self.config.addition_embed_type == "text":
             aug_emb = self.add_embedding(encoder_hidden_states)
-            emb = emb + aug_emb
         elif self.config.addition_embed_type == "text_image":
-            # Kadinsky 2.1 - style
+            # Kandinsky 2.1 - style
             if "image_embeds" not in added_cond_kwargs:
                 raise ValueError(
                     f"{self.__class__} has the config param `addition_embed_type` set to 'text_image' which requires"
@@ -898,9 +1009,49 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
 
             image_embs = added_cond_kwargs.get("image_embeds")
             text_embs = added_cond_kwargs.get("text_embeds", encoder_hidden_states)
-
             aug_emb = self.add_embedding(text_embs, image_embs)
-            emb = emb + aug_emb
+        elif self.config.addition_embed_type == "text_time":
+            # SDXL - style
+            if "text_embeds" not in added_cond_kwargs:
+                raise ValueError(
+                    f"{self.__class__} has the config param `addition_embed_type` set to 'text_time' which requires"
+                    " the keyword argument `text_embeds` to be passed in `added_cond_kwargs`"
+                )
+            text_embeds = added_cond_kwargs.get("text_embeds")
+            if "time_ids" not in added_cond_kwargs:
+                raise ValueError(
+                    f"{self.__class__} has the config param `addition_embed_type` set to 'text_time' which requires"
+                    " the keyword argument `time_ids` to be passed in `added_cond_kwargs`"
+                )
+            time_ids = added_cond_kwargs.get("time_ids")
+            time_embeds = self.add_time_proj(time_ids.flatten())
+            time_embeds = time_embeds.reshape((text_embeds.shape[0], -1))
+
+            add_embeds = torch.concat([text_embeds, time_embeds], dim=-1)
+            add_embeds = add_embeds.to(emb.dtype)
+            aug_emb = self.add_embedding(add_embeds)
+        elif self.config.addition_embed_type == "image":
+            # Kandinsky 2.2 - style
+            if "image_embeds" not in added_cond_kwargs:
+                raise ValueError(
+                    f"{self.__class__} has the config param `addition_embed_type` set to 'image' which requires the"
+                    " keyword argument `image_embeds` to be passed in `added_cond_kwargs`"
+                )
+            image_embs = added_cond_kwargs.get("image_embeds")
+            aug_emb = self.add_embedding(image_embs)
+        elif self.config.addition_embed_type == "image_hint":
+            # Kandinsky 2.2 - style
+            if "image_embeds" not in added_cond_kwargs or "hint" not in added_cond_kwargs:
+                raise ValueError(
+                    f"{self.__class__} has the config param `addition_embed_type` set to 'image_hint' which requires"
+                    " the keyword arguments `image_embeds` and `hint` to be passed in `added_cond_kwargs`"
+                )
+            image_embs = added_cond_kwargs.get("image_embeds")
+            hint = added_cond_kwargs.get("hint")
+            aug_emb, hint = self.add_embedding(image_embs, hint)
+            sample = torch.cat([sample, hint], dim=1)
+
+        emb = emb + aug_emb if aug_emb is not None else emb
 
         if self.time_embed_act is not None:
             emb = self.time_embed_act(emb)
@@ -917,14 +1068,37 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
 
             image_embeds = added_cond_kwargs.get("image_embeds")
             encoder_hidden_states = self.encoder_hid_proj(encoder_hidden_states, image_embeds)
-
+        elif self.encoder_hid_proj is not None and self.config.encoder_hid_dim_type == "image_proj":
+            # Kandinsky 2.2 - style
+            if "image_embeds" not in added_cond_kwargs:
+                raise ValueError(
+                    f"{self.__class__} has the config param `encoder_hid_dim_type` set to 'image_proj' which requires"
+                    " the keyword argument `image_embeds` to be passed in  `added_conditions`"
+                )
+            image_embeds = added_cond_kwargs.get("image_embeds")
+            encoder_hidden_states = self.encoder_hid_proj(image_embeds)
         # 2. pre-process
         sample = self.conv_in(sample)
 
+        # 2.5 GLIGEN position net
+        if cross_attention_kwargs is not None and cross_attention_kwargs.get("gligen", None) is not None:
+            cross_attention_kwargs = cross_attention_kwargs.copy()
+            gligen_args = cross_attention_kwargs.pop("gligen")
+            cross_attention_kwargs["gligen"] = {"objs": self.position_net(**gligen_args)}
+
         # 3. down
+
+        is_controlnet = mid_block_additional_residual is not None and down_block_additional_residuals is not None
+        is_adapter = mid_block_additional_residual is None and down_block_additional_residuals is not None
+
         down_block_res_samples = (sample,)
         for downsample_block in self.down_blocks:
             if hasattr(downsample_block, "has_cross_attention") and downsample_block.has_cross_attention:
+                # For t2i-adapter CrossAttnDownBlockFlat
+                additional_residuals = {}
+                if is_adapter and len(down_block_additional_residuals) > 0:
+                    additional_residuals["additional_residuals"] = down_block_additional_residuals.pop(0)
+
                 sample, res_samples = downsample_block(
                     hidden_states=sample,
                     temb=emb,
@@ -932,13 +1106,17 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
                     attention_mask=attention_mask,
                     cross_attention_kwargs=cross_attention_kwargs,
                     encoder_attention_mask=encoder_attention_mask,
+                    **additional_residuals,
                 )
             else:
                 sample, res_samples = downsample_block(hidden_states=sample, temb=emb)
 
+                if is_adapter and len(down_block_additional_residuals) > 0:
+                    sample += down_block_additional_residuals.pop(0)
+
             down_block_res_samples += res_samples
 
-        if down_block_additional_residuals is not None:
+        if is_controlnet:
             new_down_block_res_samples = ()
 
             for down_block_res_sample, down_block_additional_residual in zip(
@@ -960,7 +1138,7 @@ class UNetFlatConditionModel(ModelMixin, ConfigMixin):
                 encoder_attention_mask=encoder_attention_mask,
             )
 
-        if mid_block_additional_residual is not None:
+        if is_controlnet:
             sample = sample + mid_block_additional_residual
 
         # 5. up
@@ -1212,6 +1390,7 @@ class CrossAttnDownBlockFlat(nn.Module):
         temb_channels: int,
         dropout: float = 0.0,
         num_layers: int = 1,
+        transformer_layers_per_block: int = 1,
         resnet_eps: float = 1e-6,
         resnet_time_scale_shift: str = "default",
         resnet_act_fn: str = "swish",
@@ -1226,6 +1405,7 @@ class CrossAttnDownBlockFlat(nn.Module):
         use_linear_projection=False,
         only_cross_attention=False,
         upcast_attention=False,
+        attention_type="default",
     ):
         super().__init__()
         resnets = []
@@ -1256,12 +1436,13 @@ class CrossAttnDownBlockFlat(nn.Module):
                         num_attention_heads,
                         out_channels // num_attention_heads,
                         in_channels=out_channels,
-                        num_layers=1,
+                        num_layers=transformer_layers_per_block,
                         cross_attention_dim=cross_attention_dim,
                         norm_num_groups=resnet_groups,
                         use_linear_projection=use_linear_projection,
                         only_cross_attention=only_cross_attention,
                         upcast_attention=upcast_attention,
+                        attention_type=attention_type,
                     )
                 )
             else:
@@ -1299,10 +1480,13 @@ class CrossAttnDownBlockFlat(nn.Module):
         attention_mask: Optional[torch.FloatTensor] = None,
         cross_attention_kwargs: Optional[Dict[str, Any]] = None,
         encoder_attention_mask: Optional[torch.FloatTensor] = None,
+        additional_residuals=None,
     ):
         output_states = ()
 
-        for resnet, attn in zip(self.resnets, self.attentions):
+        blocks = list(zip(self.resnets, self.attentions))
+
+        for i, (resnet, attn) in enumerate(blocks):
             if self.training and self.gradient_checkpointing:
 
                 def create_custom_forward(module, return_dict=None):
@@ -1321,16 +1505,13 @@ class CrossAttnDownBlockFlat(nn.Module):
                     temb,
                     **ckpt_kwargs,
                 )
-                hidden_states = torch.utils.checkpoint.checkpoint(
-                    create_custom_forward(attn, return_dict=False),
+                hidden_states = attn(
                     hidden_states,
-                    encoder_hidden_states,
-                    None,  # timestep
-                    None,  # class_labels
-                    cross_attention_kwargs,
-                    attention_mask,
-                    encoder_attention_mask,
-                    **ckpt_kwargs,
+                    encoder_hidden_states=encoder_hidden_states,
+                    cross_attention_kwargs=cross_attention_kwargs,
+                    attention_mask=attention_mask,
+                    encoder_attention_mask=encoder_attention_mask,
+                    return_dict=False,
                 )[0]
             else:
                 hidden_states = resnet(hidden_states, temb)
@@ -1342,6 +1523,10 @@ class CrossAttnDownBlockFlat(nn.Module):
                     encoder_attention_mask=encoder_attention_mask,
                     return_dict=False,
                 )[0]
+
+            # apply additional residuals to the output of the last pair of resnet and attention blocks
+            if i == len(blocks) - 1 and additional_residuals is not None:
+                hidden_states = hidden_states + additional_residuals
 
             output_states = output_states + (hidden_states,)
 
@@ -1446,6 +1631,7 @@ class CrossAttnUpBlockFlat(nn.Module):
         temb_channels: int,
         dropout: float = 0.0,
         num_layers: int = 1,
+        transformer_layers_per_block: int = 1,
         resnet_eps: float = 1e-6,
         resnet_time_scale_shift: str = "default",
         resnet_act_fn: str = "swish",
@@ -1459,6 +1645,7 @@ class CrossAttnUpBlockFlat(nn.Module):
         use_linear_projection=False,
         only_cross_attention=False,
         upcast_attention=False,
+        attention_type="default",
     ):
         super().__init__()
         resnets = []
@@ -1491,12 +1678,13 @@ class CrossAttnUpBlockFlat(nn.Module):
                         num_attention_heads,
                         out_channels // num_attention_heads,
                         in_channels=out_channels,
-                        num_layers=1,
+                        num_layers=transformer_layers_per_block,
                         cross_attention_dim=cross_attention_dim,
                         norm_num_groups=resnet_groups,
                         use_linear_projection=use_linear_projection,
                         only_cross_attention=only_cross_attention,
                         upcast_attention=upcast_attention,
+                        attention_type=attention_type,
                     )
                 )
             else:
@@ -1555,16 +1743,13 @@ class CrossAttnUpBlockFlat(nn.Module):
                     temb,
                     **ckpt_kwargs,
                 )
-                hidden_states = torch.utils.checkpoint.checkpoint(
-                    create_custom_forward(attn, return_dict=False),
+                hidden_states = attn(
                     hidden_states,
-                    encoder_hidden_states,
-                    None,  # timestep
-                    None,  # class_labels
-                    cross_attention_kwargs,
-                    attention_mask,
-                    encoder_attention_mask,
-                    **ckpt_kwargs,
+                    encoder_hidden_states=encoder_hidden_states,
+                    cross_attention_kwargs=cross_attention_kwargs,
+                    attention_mask=attention_mask,
+                    encoder_attention_mask=encoder_attention_mask,
+                    return_dict=False,
                 )[0]
             else:
                 hidden_states = resnet(hidden_states, temb)
@@ -1592,6 +1777,7 @@ class UNetMidBlockFlatCrossAttn(nn.Module):
         temb_channels: int,
         dropout: float = 0.0,
         num_layers: int = 1,
+        transformer_layers_per_block: int = 1,
         resnet_eps: float = 1e-6,
         resnet_time_scale_shift: str = "default",
         resnet_act_fn: str = "swish",
@@ -1603,6 +1789,7 @@ class UNetMidBlockFlatCrossAttn(nn.Module):
         dual_cross_attention=False,
         use_linear_projection=False,
         upcast_attention=False,
+        attention_type="default",
     ):
         super().__init__()
 
@@ -1634,11 +1821,12 @@ class UNetMidBlockFlatCrossAttn(nn.Module):
                         num_attention_heads,
                         in_channels // num_attention_heads,
                         in_channels=in_channels,
-                        num_layers=1,
+                        num_layers=transformer_layers_per_block,
                         cross_attention_dim=cross_attention_dim,
                         norm_num_groups=resnet_groups,
                         use_linear_projection=use_linear_projection,
                         upcast_attention=upcast_attention,
+                        attention_type=attention_type,
                     )
                 )
             else:
@@ -1670,6 +1858,8 @@ class UNetMidBlockFlatCrossAttn(nn.Module):
         self.attentions = nn.ModuleList(attentions)
         self.resnets = nn.ModuleList(resnets)
 
+        self.gradient_checkpointing = False
+
     def forward(
         self,
         hidden_states: torch.FloatTensor,
@@ -1681,15 +1871,42 @@ class UNetMidBlockFlatCrossAttn(nn.Module):
     ) -> torch.FloatTensor:
         hidden_states = self.resnets[0](hidden_states, temb)
         for attn, resnet in zip(self.attentions, self.resnets[1:]):
-            hidden_states = attn(
-                hidden_states,
-                encoder_hidden_states=encoder_hidden_states,
-                cross_attention_kwargs=cross_attention_kwargs,
-                attention_mask=attention_mask,
-                encoder_attention_mask=encoder_attention_mask,
-                return_dict=False,
-            )[0]
-            hidden_states = resnet(hidden_states, temb)
+            if self.training and self.gradient_checkpointing:
+
+                def create_custom_forward(module, return_dict=None):
+                    def custom_forward(*inputs):
+                        if return_dict is not None:
+                            return module(*inputs, return_dict=return_dict)
+                        else:
+                            return module(*inputs)
+
+                    return custom_forward
+
+                ckpt_kwargs: Dict[str, Any] = {"use_reentrant": False} if is_torch_version(">=", "1.11.0") else {}
+                hidden_states = attn(
+                    hidden_states,
+                    encoder_hidden_states=encoder_hidden_states,
+                    cross_attention_kwargs=cross_attention_kwargs,
+                    attention_mask=attention_mask,
+                    encoder_attention_mask=encoder_attention_mask,
+                    return_dict=False,
+                )[0]
+                hidden_states = torch.utils.checkpoint.checkpoint(
+                    create_custom_forward(resnet),
+                    hidden_states,
+                    temb,
+                    **ckpt_kwargs,
+                )
+            else:
+                hidden_states = attn(
+                    hidden_states,
+                    encoder_hidden_states=encoder_hidden_states,
+                    cross_attention_kwargs=cross_attention_kwargs,
+                    attention_mask=attention_mask,
+                    encoder_attention_mask=encoder_attention_mask,
+                    return_dict=False,
+                )[0]
+                hidden_states = resnet(hidden_states, temb)
 
         return hidden_states
 

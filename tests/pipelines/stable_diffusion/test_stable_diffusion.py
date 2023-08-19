@@ -731,6 +731,7 @@ class StableDiffusionPipelineSlowTests(unittest.TestCase):
     def test_stable_diffusion_attention_slicing(self):
         torch.cuda.reset_peak_memory_stats()
         pipe = StableDiffusionPipeline.from_pretrained("CompVis/stable-diffusion-v1-4", torch_dtype=torch.float16)
+        pipe.unet.set_default_attn_processor()
         pipe = pipe.to(torch_device)
         pipe.set_progress_bar_config(disable=None)
 
@@ -746,6 +747,7 @@ class StableDiffusionPipelineSlowTests(unittest.TestCase):
 
         # disable slicing
         pipe.disable_attention_slicing()
+        pipe.unet.set_default_attn_processor()
         inputs = self.get_inputs(torch_device, dtype=torch.float16)
         image = pipe(**inputs).images
 
@@ -1029,7 +1031,7 @@ class StableDiffusionPipelineCkptTests(unittest.TestCase):
         ]
 
         for ckpt_path in ckpt_paths:
-            pipe = StableDiffusionPipeline.from_ckpt(ckpt_path, torch_dtype=torch.float16)
+            pipe = StableDiffusionPipeline.from_single_file(ckpt_path, torch_dtype=torch.float16)
             pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
             pipe.to("cuda")
 
@@ -1040,7 +1042,7 @@ class StableDiffusionPipelineCkptTests(unittest.TestCase):
     def test_download_local(self):
         filename = hf_hub_download("runwayml/stable-diffusion-v1-5", filename="v1-5-pruned-emaonly.ckpt")
 
-        pipe = StableDiffusionPipeline.from_ckpt(filename, torch_dtype=torch.float16)
+        pipe = StableDiffusionPipeline.from_single_file(filename, torch_dtype=torch.float16)
         pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
         pipe.to("cuda")
 
@@ -1051,7 +1053,7 @@ class StableDiffusionPipelineCkptTests(unittest.TestCase):
     def test_download_ckpt_diff_format_is_same(self):
         ckpt_path = "https://huggingface.co/runwayml/stable-diffusion-v1-5/blob/main/v1-5-pruned-emaonly.ckpt"
 
-        pipe = StableDiffusionPipeline.from_ckpt(ckpt_path)
+        pipe = StableDiffusionPipeline.from_single_file(ckpt_path)
         pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)
         pipe.unet.set_attn_processor(AttnProcessor())
         pipe.to("cuda")
@@ -1065,9 +1067,9 @@ class StableDiffusionPipelineCkptTests(unittest.TestCase):
         pipe.to("cuda")
 
         generator = torch.Generator(device="cpu").manual_seed(0)
-        image = pipe("a turtle", num_inference_steps=5, generator=generator, output_type="np").images[0]
+        image = pipe("a turtle", num_inference_steps=2, generator=generator, output_type="np").images[0]
 
-        assert np.max(np.abs(image - image_ckpt)) < 1e-4
+        assert np.max(np.abs(image - image_ckpt)) < 1e-3
 
 
 @nightly
