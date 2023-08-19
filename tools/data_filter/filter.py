@@ -1,9 +1,10 @@
 from tqdm import tqdm
 import json
+import math
 
 
-scene = "night"
-co = "0.80_0.80_2.00"
+scene = "foggy"
+co = "0.60_0.60_2.00"
 length = "all"
 result_json = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/ori/replace_blend_reweight_%s_%s_%s.json" % (scene, co, length) if scene != "snowy" else "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/ori/refine_blend_reweight_%s_%s_%s.json" % (scene, co, length)
 topk = 1000
@@ -19,7 +20,7 @@ with open(result_json) as json_res:
         image_caption_sim_1 = res_sorted[i]["image_caption_sim_1"]
         image_caption_sim_2 = res_sorted[i]["image_caption_sim_2"]
         directional_sim = res_sorted[i]["directional_sim"]
-        if image_image_sim < 0.75 or image_caption_sim_1 < 0.2 or image_caption_sim_2 < 0.2 or directional_sim < 0.2:
+        if image_image_sim < 0.75 or image_caption_sim_1 < 0.2 or image_caption_sim_2 < 0.2 or directional_sim < 0.2 or math.isnan(directional_sim):
             black_ids.append(id_)
             
 white_res_sorted = [_ for _ in res_sorted if _["id"] not in black_ids][:topk]

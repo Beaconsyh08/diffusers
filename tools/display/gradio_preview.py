@@ -3,8 +3,9 @@ import os
 from PIL import Image
 import random
 
-root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/casual"
+root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
 users = ["syh", "fkx", "lyy", "ckl", "others"]
+selected_models = ["INS-Base", "INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.3.0-5000"]
 
 def feedback(feedback_text, model, scene, user):
     print("click")
@@ -25,6 +26,7 @@ def get_file_paths(folder_path):
 def generation_eval():
     # print("request.headers: ", request.headers)
     models = sorted([f for f in os.listdir(root) if os.path.isdir(os.path.join(root, f))])
+    models = [_ for _ in selected_models if _ in models]
     model_root = "%s/%s" % (root, models[-2])
     scenes = [f for f in os.listdir(model_root) if os.path.isdir(os.path.join(model_root, f))]
     display_scenes = [_.split("_")[-1] for _ in scenes]

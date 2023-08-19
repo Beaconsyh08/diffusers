@@ -5,22 +5,22 @@ import json
 from tqdm import tqdm
 
 # P2P + ControlNet
-P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_controlnet/index.txt"  
+P2P_PATH = "/tos://haomo-public/lucas-generation/syh/train/prompt2prompt_controlnet_0810/index.txt"  
 # P2P_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn_human.txt"  
 
 
 # P2P
 # P2P_PATH = "tos://haomo-public/lucas-generation/syh/train/instructpix2pix/index.txt"
-SCENE = "night"
+SCENE = "snowy"
 MODE = "replace_blend_reweight" if SCENE != "snowy" else "refine_blend_reweight"
 FOLDER_PATH = "/mnt/ve_share/songyuhao/generation/data/p2p_cn/imgs/%s/%s" % (MODE, SCENE)
-TYPE = "folder"
+TYPE = "txt"
 ONLINE = True
 
-PARA = "0.70_0.70_2.00"
-SIZE = 500
+PARA = "0.60_0.60_2.00"
+SIZE = 1000
 STREET = False
-PARQUET_PATH = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_street" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet/%s_%s_%s_%d_cn_filtered" % (MODE, SCENE, PARA, SIZE)
+PARQUET_PATH = "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet_v2/%s/%s/%s/%d_street_cn_filtered" % (MODE, SCENE, PARA, SIZE) if STREET else "/mnt/ve_share/songyuhao/generation/data/train/diffusions/parquet_v2/%s/%s/%s/%d_cn_filtered" % (MODE, SCENE, PARA, SIZE)
 os.makedirs(PARQUET_PATH, exist_ok=True)
 PARQUET_PATH = "%s/pcn.parquet" % PARQUET_PATH
 WHITE_PATH = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/filtered/%s_%s_%s_%s.json" % (MODE, SCENE, PARA, SIZE)
@@ -60,7 +60,7 @@ if WHITE_FILTER:
         white_json = json.load(white_file)
         white_ids = [_["id"] for _ in white_json]
     ori_lens = len(paths)
-
+    paths = paths[:-1] if TYPE == "txt" else paths
     paths = [_ for _ in paths if int(_[-3]) in white_ids]
     print(ori_lens, len(paths))
 

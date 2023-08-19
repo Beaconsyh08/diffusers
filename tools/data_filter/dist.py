@@ -12,8 +12,8 @@ root = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn"
 # result_json = "%s/%s/replace_blend_reweight_%s_%s_%s.json" % (root, mode, scene, co, length) if scene != "snowy" else "%s/ori/refine_blend_reweight_%s_%s_%s.json" % (root, mode, scene, co, length)
 # folder_name = "%s/%s_%s_%s" % (root, scene, mode, length)
 
-result_json = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/filtered/night_0.80+0.70_1000.json"
-folder_name = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/night_0.80+0.70_1000"
+result_json = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/filtered/replace_blend_reweight_night_0.60_0.60_2.00_1000.json"
+folder_name = "/mnt/ve_share/songyuhao/generation/data/filtered_p2p_cn/night_0.60_1000"
 
 os.makedirs(folder_name, exist_ok=True)
 
@@ -32,10 +32,10 @@ for key in keys:
     plt.figure(figsize=(15, 10))
     plt.hist(values, bins=100, color='skyblue', edgecolor='black')
 
-    plt.axvline(mean, color='red', linestyle='dashed', linewidth=2, label=f'Mean: {mean:.2f}')
-    plt.axvline(mean + std_dev, color='orange', linestyle='dashed', linewidth=2, label=f'Standard Deviation: {std_dev:.2f}')
+    plt.axvline(mean, color='red', linestyle='dashed', linewidth=2, label=f'Mean: {mean:.3f}')
+    plt.axvline(mean + std_dev, color='orange', linestyle='dashed', linewidth=2, label=f'Standard Deviation: {std_dev:.3f}')
     plt.axvline(mean - std_dev, color='orange', linestyle='dashed', linewidth=2)
-    plt.axvline(medain, color='green', linestyle='dashed', linewidth=2, label=f'Median: {medain:.2f}')
+    plt.axvline(medain, color='green', linestyle='dashed', linewidth=2, label=f'Median: {medain:.3f}')
 
     plt.legend()
     
