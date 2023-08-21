@@ -20,8 +20,8 @@ sys.path.append(current_dir)
 app = Flask(__name__)
 CORS(app)
 
-model_id = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model/INS-HM-V0.3.0-5000"
-model_id = "/share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model/INS-HM-V0.3.0-5000"
+# model_id = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model/INS-HM-V0.3.0-5000"
+model_id = "/root/models/INS-HM-V0.3.0-5000"
 
 pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float16).to("cuda")
 
