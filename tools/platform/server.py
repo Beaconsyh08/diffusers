@@ -8,7 +8,9 @@ import PIL
 import torch
 from diffusers import StableDiffusionInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel
 import os
+from img_blur_processor import IMGBlurProcessor
 
+sys.path.insert(0, "/root/GenLane/Mask2Former/demo")
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(str(Path(current_dir).parent))
@@ -54,8 +56,16 @@ def playground():
     image_path = message['image'] + "/" if not message['image'].startswith("/") else image_path
     output_data = copy.deepcopy(input_data)
 
-    test_image = preprocess_image(image_path)
-    image = pipe(prompt, image=test_image, num_inference_steps=50, image_guidance_scale=1.5, guidance_scale=7).images[0]
+    if message['scene'] == "blur_lane":
+        # img_blur_processor = IMGBlurProcessor(["/mnt/ve_share/songyuhao/generation/data/test/exp169/aaa.jpg"], 0.3, 5, "/mnt/ve_share/songyuhao/generation/data/genlan_test", "Gaussian", False)
+        output_folder = "/root/result/GenLane"
+        os.makedirs(output_folder, exist_ok=True)
+        img_blur_processor = IMGBlurProcessor(image_path, 0.3, 5, output_folder, "Gaussian", True)
+        image = img_blur_processor.run()
+    else:
+        test_image = preprocess_image(image_path)
+        image = pipe(prompt, image=test_image, num_inference_steps=50, image_guidance_scale=1.5, guidance_scale=7).images[0]
+        
     output_data['output'] = {"image": image}
     print(output_data)
     return jsonify(output_data)
