@@ -57,6 +57,6 @@ accelerate launch --mixed_precision="fp16" --multi_gpu ./examples/instruct_pix2p
 
 #   --enable_xformers_memory_efficient_attention \
 
-pip install safetensors
-python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
-cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors
+# pip install safetensors
+# python ./scripts/convert_diffusers_to_original_stable_diffusion.py --use_safetensors --model_path $OUTPUT_DIR --checkpoint_path $OUTPUT_DIR/model.safetensors
+# cp $OUTPUT_DIR/model.safetensors /cpfs/model/model.safetensors
