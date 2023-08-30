@@ -43,7 +43,7 @@ prompts = ["a street filled with lots of traffic at night time with lights on an
 
 
 # model_names = ["SD-Base", "SD-HM-V0.0", "SD-HM-V0.1", "SD-HM-V1.0", "SD-HM-V1.1", "SD-HM-V1.2", "SD-HM-V2.0", "SD-HM-V3.0", "SD-HM-V3.0.1", "SD-HM-V3.1", "SD-HM-V3.1.1", "SD-HM-V4.0", "SD-HM-V4.0.1", "SD-HM-V4.1", "SD-HM-V4.1.1"]
-model_names = ["SD-HM-V0.6.2"]
+model_names = ["SD-HM-V0.4.0"]
 
 # model_dir = "./res/finetune/dreambooth" 
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/finetune/dreambooth"

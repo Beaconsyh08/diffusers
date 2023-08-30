@@ -14,25 +14,34 @@ def preprocess_image(url):
     image = PIL.Image.open(url)
     image = PIL.ImageOps.exif_transpose(image)
     image = image.convert("RGB")
-    # image = image.resize((1024, 576))
-    image = image.resize((512, 512))
+    image = image.resize((1024, 576))
+
     
     return image
 
-prompts = ["make it dawn", "make it dusk", "make it night", "make it rainy", "make it snowy", "make it cloudy", "make it foggy", "make it contre-jour", "make it backlight"]
-# prompts = ["make it night"]
+prompts = ["make it dawn", 
+           "make it dusk", 
+           "make it night", 
+           "make it rainy", 
+           "make it snowy", 
+           "make it cloudy", 
+           "make it foggy", 
+           "make it contre-jour"]
+# prompts = ["make it night", "make it rainy", "make it snowy", "make it foggy"]
 
-# "INS-HM-SNOWY-V0.3.0", "INS-HM-SNOWY-V0.3.0/checkpoint-2500", "INS-HM-SNOWY-V0.3.0/checkpoint-5000", "INS-HM-SNOWY-V0.3.0/checkpoint-7500", "INS-HM-SNOWY-V0.3.0/checkpoint-10000", "INS-HM-SNOWY-V0.3.0/checkpoint-12500"
-model_names = ["INS-HM-V0.4.0/checkpoint-5000", "INS-HM-V0.4.1/checkpoint-5000", "INS-HM-V0.4.2/checkpoint-5000"]
+
+# model_names = ["INS-HM-V0.4.3/checkpoint-5000", "INS-HM-V0.4.3/checkpoint-10000", "INS-HM-V0.4.4/checkpoint-5000", "INS-HM-V0.4.4/checkpoint-10000", "INS-HM-V0.4.4", "INS-HM-V0.4.3"]
+# model_names = ["INS-HM-V0.4.0-5000", "INS-HM-V0.3.0-5000", "INS-HM-V0.4.3-5000"]
+model_names = ["INS-HM-V0.3.0-5000",]
 
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
-# model_dir = "/mnt/share_disk/songyuhao/models/online/diffusions/res/instructpix2pix/model"a
+# model_dir = "/mnt/share_disk/songyuhao/models/online/diffusions/res/instructpix2pix/model"
 
-combine = True
+combine = False
 
 # test_path = '/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/test_lyy/INS-HM-V0.3.0-5000/rainy'
-test_path = "/mnt/ve_share/songyuhao/generation/data/test/v0.0"
-res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
+test_path = "/mnt/ve_share/songyuhao/generation/data/test/exp169_s"
+res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/test169_s"
 
 image_paths = []
 for foldername, subfolders, filenames in os.walk(test_path):

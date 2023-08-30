@@ -3,8 +3,8 @@ import os
 from PIL import Image
 
 root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
-users = ["syh", "fkx", "lyy", "ckl", "others"]
-selected_models = ["INS-Base", "INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.3.0-5000"]
+users = ["syh", "fkx", "lyy", "lm", "ckl", "others"]
+selected_models = ["INS-Base", "INS-HM-V0.0.0", "INS-HM-V0.1.0", "INS-HM-V0.3.0-5000", "INS-HM-V0.4.0-5000", "INS-HM-V0.4.3-5000"]
 
 def feedback(label_check, scene_check, model, scene, user):
     print("click")
