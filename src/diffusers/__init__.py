@@ -171,6 +171,7 @@ else:
         ShapEPipeline,
         StableDiffusionAdapterPipeline,
         StableDiffusionAttendAndExcitePipeline,
+        StableDiffusionControlNetInstructPix2PixPipeline,
         StableDiffusionControlNetImg2ImgPipeline,
         StableDiffusionControlNetInpaintPipeline,
         StableDiffusionControlNetPipeline,

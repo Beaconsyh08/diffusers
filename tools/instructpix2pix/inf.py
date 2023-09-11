@@ -33,12 +33,13 @@ def preprocess_image(url):
 #            ("make it night", "sunshine")]
 
 
-prompts = ["make it night", 
-           "make it rainy", 
-           "make it snowy", 
-           ("make it night", "daytime"),
-           ("make it night", "sunshine")]
+# prompts = ["make it night", 
+#            "make it rainy", 
+#            "make it snowy", 
+#            ("make it night", "daytime"),
+#            ("make it night", "sunshine")]
 
+prompts = ["make it night"]
 
 draw_text = False
 text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "雨天", "snowy": "雪天", "cloudy": "多云", "foggy": "雾天", "contre-jour": "逆光"}
@@ -48,7 +49,7 @@ text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "�
 
 # model_names = ["INS-HM-V0.4.3/checkpoint-5000", "INS-HM-V0.4.3/checkpoint-10000", "INS-HM-V0.4.4/checkpoint-5000", "INS-HM-V0.4.4/checkpoint-10000", "INS-HM-V0.4.4", "INS-HM-V0.4.3"]
 # model_names = ["INS-HM-V0.4.0-5000", "INS-HM-V0.3.0-5000", "INS-HM-V0.4.3-5000"]
-model_names = ["INS-HM-V0.4.3-5000"]
+model_names = ["INS-HM-V0.4.0-5000"]
 
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
 # model_dir = "/mnt/share_disk/songyuhao/models/online/diffusions/res/instructpix2pix/model"
@@ -56,9 +57,9 @@ model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/ins
 combine = True
 
 # test_path = '/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/test_lyy/INS-HM-V0.3.0-5000/rainy'
-test_path = "/mnt/ve_share/songyuhao/generation/data/test/kl"
-# test_path = "/mnt/ve_share/songyuhao/generation/data/test/v0.0"
-res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/ckl_new"
+# test_path = "/mnt/ve_share/songyuhao/generation/data/test/kl"
+test_path = "/mnt/ve_share/songyuhao/generation/data/test/v0.0"
+res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
 
 image_paths = []
 for foldername, subfolders, filenames in os.walk(test_path):

@@ -1,5 +1,5 @@
 import os 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import PIL
 import torch
 from diffusers import StableDiffusionInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel
@@ -25,20 +25,20 @@ def preprocess_image(url):
 combine = False
 draw_text = False
 text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "雨天", "snowy": "雪天", "cloudy": "多云", "foggy": "雾天", "contre-jour": "逆光"}
-prompts = ["make it night", ("make it night", "daytime"), ("make it night", "sunshine"), "make it contre-jour", "make it rainy", "make it rainy night", "make it night rainy", "make it backlight"]
-prompts = ["make it night", ("make it night", "daytime"), ("make it night", "sunshine"), "make it rainy",  "make it contre-jour"]
-# prompts = ["make it snowy"]
+# prompts = ["make it night", ("make it night", "daytime"), ("make it night", "sunshine"), "make it contre-jour", "make it rainy", "make it rainy night", "make it night rainy", "make it backlight"]
+# prompts = ["make it rainy",  "make it contre-jour"]
+prompts = ["make it night"]
 
 # model_names = ["INS-HM-V0.4.0-5000", "INS-HM-V0.3.0-5000", "INS-HM-V0.4.3-5000"]
 # model_names = ["INS-HM-V0.3.0-5000", "INS-HM-V0.4.0-5000", "INS-HM-V0.4.3-5000"]
-model_names = ["INS-HM-V0.4.3-5000"]
+model_names = ["INS-HM-V0.4.2-5000"]
 
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
 
 # test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/EP40-PVS-42_20230420_141710/1681897682_030556160-EP40-PVS-42_EP40_MDC_0930_1215_2023-04-19-09-47-52_25"
 # test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/EP40-PVS-42_20230420_141710/1681899865_963508992-EP40-PVS-42_EP40_MDC_0930_1215_2023-04-19-10-24-22_98"
 # test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/EP40-PVS-42_20230420_141710/1681900271_051031040-EP40-PVS-42_EP40_MDC_0930_1215_2023-04-19-10-30-53_111"
-test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/EP40-PVS-42_20230420_141710"
+test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/tmp2"
 
 # test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/result/test_1_nc/INS-HM-V0.4.3-5000/rainy"
 res_root = "/mnt/share_disk/leiyayun/data/hozon_neta/result/neta"
@@ -54,7 +54,7 @@ for foldername, subfolders, filenames in os.walk(test_path):
         
 n = len(image_paths)
 image_paths.sort()
-image_paths = image_paths[:500]
+image_paths = image_paths
 print(n)
 
 for ind, model_name in enumerate(model_names):

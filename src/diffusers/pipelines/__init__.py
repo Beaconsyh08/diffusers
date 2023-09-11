@@ -48,6 +48,7 @@ else:
     from .audioldm import AudioLDMPipeline
     from .audioldm2 import AudioLDM2Pipeline, AudioLDM2ProjectionModel, AudioLDM2UNet2DConditionModel
     from .controlnet import (
+        StableDiffusionControlNetInstructPix2PixPipeline,
         StableDiffusionControlNetImg2ImgPipeline,
         StableDiffusionControlNetInpaintPipeline,
         StableDiffusionControlNetPipeline,

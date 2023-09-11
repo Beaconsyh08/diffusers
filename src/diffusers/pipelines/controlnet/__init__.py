@@ -15,6 +15,7 @@ else:
     from .multicontrolnet import MultiControlNetModel
     from .pipeline_controlnet import StableDiffusionControlNetPipeline
     from .pipeline_controlnet_img2img import StableDiffusionControlNetImg2ImgPipeline
+    from .pipeline_controlnet_instructpix2pix import StableDiffusionControlNetInstructPix2PixPipeline
     from .pipeline_controlnet_inpaint import StableDiffusionControlNetInpaintPipeline
     from .pipeline_controlnet_inpaint_sd_xl import StableDiffusionXLControlNetInpaintPipeline
     from .pipeline_controlnet_sd_xl import StableDiffusionXLControlNetPipeline
