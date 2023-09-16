@@ -51,7 +51,7 @@ def preprocess_canny_image(image):
 #            ("make it night", "daytime"),
 #            ("make it night", "sunshine")]
 
-prompts = ["make it snowy"]
+prompts = ["make it happy"]
 
 draw_text = False
 text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "雨天", "snowy": "雪天", "cloudy": "多云", "foggy": "雾天", "contre-jour": "逆光"}
