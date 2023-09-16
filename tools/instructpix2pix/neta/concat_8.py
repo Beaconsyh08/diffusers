@@ -42,8 +42,8 @@ def concat_8(image_group, save_path):
     final_image.save(save_path)
 
 
-root_path = "/mnt/share_disk/leiyayun/data/hozon_neta/result/neta"
-save_root = "/mnt/share_disk/leiyayun/data/hozon_neta/result/neta_combine"
+root_path = "/mnt/share_disk/leiyayun/data/hozon_neta/result/neta_f50_cn"
+save_root = "/mnt/share_disk/leiyayun/data/hozon_neta/result/neta_f50_cn_combine"
 os.makedirs(save_root, exist_ok=True)
 
 

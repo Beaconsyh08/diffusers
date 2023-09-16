@@ -16,11 +16,11 @@ def preprocess_image(url):
     image = PIL.Image.open(url)
     image = PIL.ImageOps.exif_transpose(image)
     image = image.convert("RGB")
-    # image = image.resize((1024, 576))
+    image = image.resize((1024, 576))
+    # image = image.resize((1920, 1080))
     # image = image.resize((512, 512))
     
     return image
-
 
 def preprocess_canny_image(image):
     image = np.array(image)
@@ -33,60 +33,46 @@ def preprocess_canny_image(image):
     
     return canny_image
 
-# prompts = ["make it dawn", 
-#            "make it dusk", 
-#            "make it night", 
-#            "make it rainy", 
-#            "make it snowy", 
-#            "make it cloudy", 
-#            "make it foggy", 
-#            "make it contre-jour",
-#            ("make it night", "daytime"),
-#            ("make it night", "sunshine")]
-
-
-# prompts = ["make it night", 
-#            "make it rainy", 
-#            "make it snowy", 
-#            ("make it night", "daytime"),
-#            ("make it night", "sunshine")]
-
-prompts = ["make it snowy"]
-
+CONTROL_SCALE = 0.3
+combine = False
 draw_text = False
 text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "雨天", "snowy": "雪天", "cloudy": "多云", "foggy": "雾天", "contre-jour": "逆光"}
+# prompts = ["make it night", ("make it night", "daytime"), ("make it night", "sunshine"), "make it contre-jour", "make it rainy", "make it rainy night", "make it night rainy", "make it backlight"]
+# prompts = ["make it rainy",  "make it contre-jour"]
+prompts = ["make it rainy"]
 
-# prompts = ["make it heavy snowy"]
-
-
-# model_names = ["INS-HM-V0.4.3/checkpoint-5000", "INS-HM-V0.4.3/checkpoint-10000", "INS-HM-V0.4.4/checkpoint-5000", "INS-HM-V0.4.4/checkpoint-10000", "INS-HM-V0.4.4", "INS-HM-V0.4.3"]
 # model_names = ["INS-HM-V0.4.0-5000", "INS-HM-V0.3.0-5000", "INS-HM-V0.4.3-5000"]
+# model_names = ["INS-HM-V0.3.0-5000", "INS-HM-V0.4.0-5000", "INS-HM-V0.4.3-5000"]
 model_names = ["INS-HM-V0.4.3-5000"]
 
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
-# model_dir = "/mnt/share_disk/songyuhao/models/online/diffusions/res/instructpix2pix/model"
 
-combine = True
+# test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/EP40-PVS-42_20230420_141710/1681897682_030556160-EP40-PVS-42_EP40_MDC_0930_1215_2023-04-19-09-47-52_25"
+# test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/EP40-PVS-42_20230420_141710/1681899865_963508992-EP40-PVS-42_EP40_MDC_0930_1215_2023-04-19-10-24-22_98"
+# test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/EP40-PVS-42_20230420_141710/1681900271_051031040-EP40-PVS-42_EP40_MDC_0930_1215_2023-04-19-10-30-53_111"
+test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/EP40-PVS-42_20230420_141710"
 
-# test_path = '/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/test_lyy/INS-HM-V0.3.0-5000/rainy'
-# test_path = "/mnt/ve_share/songyuhao/generation/data/test/kl"
-test_path = "/mnt/ve_share/songyuhao/generation/data/test/v0.0"
-res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/cn_test"
+# test_path = "/mnt/share_disk/leiyayun/data/hozon_neta/result/test_1_nc/INS-HM-V0.4.3-5000/rainy"
+res_root = "/mnt/share_disk/leiyayun/data/hozon_neta/result/neta_cn"
 
-image_paths = []
+image_paths, folders = [], []
 for foldername, subfolders, filenames in os.walk(test_path):
     for filename in filenames:
         # Get the full path of the file
+        folders.append(foldername.split("/")[-1])
         file_path = os.path.join(foldername, filename)
-        image_paths.append(file_path)
+        if file_path.endswith(".jpg") or file_path.endswith(".png"):
+            image_paths.append(file_path)
         
 n = len(image_paths)
+image_paths.sort()
+image_paths = image_paths
 print(n)
 
 for ind, model_name in enumerate(model_names):
     print(model_name)
-    res_dir = "%s/%s" % (res_root, model_name.split("/")[0] + "-" + model_name.split("/")[-1].split("-")[-1]) if "/" in model_name else "%s/%s" % (res_root, model_name)
-    os.makedirs(res_dir, exist_ok=True)
+    # res_dir = "%s/%s" % (res_root,)
+
     
     if model_name == "INS-Base":
         model_id = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/instruct-pix2pix"
@@ -100,7 +86,7 @@ for ind, model_name in enumerate(model_names):
         pipe = StableDiffusionControlNetInstructPix2PixPipeline.from_pretrained(model_id_true, unet=unet, controlnet=controlnet).to("cuda")
         
     else:
-        pipe = StableDiffusionControlNetInstructPix2PixPipeline.from_pretrained(model_id,  controlnet=controlnet).to("cuda")
+        pipe = StableDiffusionControlNetInstructPix2PixPipeline.from_pretrained(model_id, controlnet=controlnet).to("cuda")
     # pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
     
     pipe.safety_checker = lambda images, **kwargs: (images, [False] * len(images))
@@ -112,9 +98,11 @@ for ind, model_name in enumerate(model_names):
         if type(prompt) == tuple:
             prompt_neg = prompt[1]
             prompt = prompt[0]
-            res_dir_p = "%s/%s_neg_%s" % (res_dir, "_".join(prompt.split(" ")), "_".join(prompt_neg.split(" ")))
+            print("neg", prompt_neg)
+            
+            res_dir_p = "%s/%s_neg_%s" % (res_root, "_".join(prompt.split(" ")), "_".join(prompt_neg.split(" ")))
         else:
-            res_dir_p = "%s/%s" % (res_dir, "_".join(prompt.split(" ")))
+            res_dir_p = "%s/%s" % (res_root, "_".join(prompt.split(" ")))
         os.makedirs(res_dir_p, exist_ok=True)
         
         file_count = 0
@@ -125,11 +113,17 @@ for ind, model_name in enumerate(model_names):
             continue
         
         for i, image_path in tqdm(enumerate(image_paths), total=len(image_paths)):
+            if image_path[-5] == "e":
+                continue    
             test_image = preprocess_image(image_path)
             control_image = preprocess_canny_image(test_image)
-            image = pipe(prompt, image=test_image, num_inference_steps=50, image_guidance_scale=1.5, guidance_scale=7, negative_prompt=prompt_neg, control_image=control_image, controlnet_conditioning_scale=0.5).images[0]
-            res_id = "%s/%d.png" % (res_dir_p, i)
+            image = pipe(prompt, image=test_image, num_inference_steps=50, image_guidance_scale=1.5, guidance_scale=7, negative_prompt=prompt_neg, control_image=control_image, controlnet_conditioning_scale=CONTROL_SCALE).images[0]
             
+            res_dir = "%s/%s" % (res_dir_p, image_path.split(".")[0].split("/")[-2])
+            os.makedirs(res_dir, exist_ok=True)
+            
+            res_id = "%s/%s" % (res_dir, image_path.split("/")[-1])
+    
             if draw_text:
                 scene = prompt.split(" ")[-1]
                 I1 = ImageDraw.Draw(image)
