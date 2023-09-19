@@ -1,5 +1,5 @@
 import os 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import PIL
 import torch
 from diffusers import StableDiffusionControlNetInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel, ControlNetModel
@@ -36,10 +36,11 @@ def preprocess_canny_image(image):
 CONTROL_SCALE = 0.3
 combine = False
 draw_text = False
+torch_dtype = torch.float32
 text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "雨天", "snowy": "雪天", "cloudy": "多云", "foggy": "雾天", "contre-jour": "逆光"}
 # prompts = ["make it night", ("make it night", "daytime"), ("make it night", "sunshine"), "make it contre-jour", "make it rainy", "make it rainy night", "make it night rainy", "make it backlight"]
 # prompts = ["make it rainy",  "make it contre-jour"]
-prompts = ["make it rainy"]
+prompts = ["make it contre-jour"]
 
 # model_names = ["INS-HM-V0.4.0-5000", "INS-HM-V0.3.0-5000", "INS-HM-V0.4.3-5000"]
 # model_names = ["INS-HM-V0.3.0-5000", "INS-HM-V0.4.0-5000", "INS-HM-V0.4.3-5000"]
@@ -66,7 +67,7 @@ for foldername, subfolders, filenames in os.walk(test_path):
         
 n = len(image_paths)
 image_paths.sort()
-image_paths = image_paths
+image_paths = image_paths[:500]
 print(n)
 
 for ind, model_name in enumerate(model_names):
@@ -79,11 +80,11 @@ for ind, model_name in enumerate(model_names):
     else:
         model_id= "%s/%s" % (model_dir, model_name)
     
-    controlnet = ControlNetModel.from_pretrained("/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/control_v11p_sd15_canny")
+    controlnet = ControlNetModel.from_pretrained("/mnt/ve_share/songyuhao/generation/models/online/diffusions/base/control_v11p_sd15_canny", torch_dtype=torch_dtype).to("cuda")
     if "/" in model_name:
         unet = UNet2DConditionModel.from_pretrained("%s/unet_ema" % model_id)
         model_id_true = "/".join(model_id.split("/")[:-1])
-        pipe = StableDiffusionControlNetInstructPix2PixPipeline.from_pretrained(model_id_true, unet=unet, controlnet=controlnet).to("cuda")
+        pipe = StableDiffusionControlNetInstructPix2PixPipeline.from_pretrained(model_id_true, unet=unet, controlnet=controlnet, torch_dtype=torch_dtype).to("cuda")
         
     else:
         pipe = StableDiffusionControlNetInstructPix2PixPipeline.from_pretrained(model_id, controlnet=controlnet).to("cuda")
@@ -102,15 +103,16 @@ for ind, model_name in enumerate(model_names):
             
             res_dir_p = "%s/%s_neg_%s" % (res_root, "_".join(prompt.split(" ")), "_".join(prompt_neg.split(" ")))
         else:
-            res_dir_p = "%s/%s" % (res_root, "_".join(prompt.split(" ")))
+            res_dir_p = "%s/%s_%.2f_16" % (res_root, "_".join(prompt.split(" ")), CONTROL_SCALE)
         os.makedirs(res_dir_p, exist_ok=True)
+        print(res_dir_p)
         
         file_count = 0
         for _, _, files in os.walk(res_dir_p):
             file_count += len(files)
         
-        if file_count >= n:        
-            continue
+        # if file_count >= n:        
+        #     continue
         
         for i, image_path in tqdm(enumerate(image_paths), total=len(image_paths)):
             if image_path[-5] == "e":

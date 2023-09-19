@@ -70,7 +70,7 @@ for ind, model_name in enumerate(model_names):
     if "/" in model_name:
         unet = UNet2DConditionModel.from_pretrained("%s/unet_ema" % model_id)
         model_id_true = "/".join(model_id.split("/")[:-1])
-        pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id_true, unet=unet).to("cuda")
+        pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id_true, unet=unet, torch_dtype=torch.float32).to("cuda")
         
     else:
         pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(model_id, torch_dtype=torch.float32).to("cuda")

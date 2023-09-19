@@ -284,6 +284,7 @@ if TYPE_CHECKING:
         from .audioldm2 import AudioLDM2Pipeline, AudioLDM2ProjectionModel, AudioLDM2UNet2DConditionModel
         from .controlnet import (
             StableDiffusionControlNetImg2ImgPipeline,
+            StableDiffusionControlNetInstructPix2PixPipeline,
             StableDiffusionControlNetInpaintPipeline,
             StableDiffusionControlNetPipeline,
             StableDiffusionXLControlNetImg2ImgPipeline,
