@@ -50,7 +50,6 @@ accelerate launch --multi_gpu ./examples/instruct_pix2pix/train_instruct_pix2pix
  --checkpointing_steps=2500\
  --learning_rate=5e-05 --lr_warmup_steps=0 \
  --conditioning_dropout_prob=0.05 \
- --mixed_precision=fp16 \
  --seed=42 \
  --output_dir=$OUTPUT_DIR
 
