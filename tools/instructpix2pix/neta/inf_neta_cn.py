@@ -33,7 +33,7 @@ def preprocess_canny_image(image):
     
     return canny_image
 
-CONTROL_SCALE = 0.3
+CONTROL_SCALE = 0.5
 combine = False
 draw_text = False
 torch_dtype = torch.float32
@@ -103,7 +103,7 @@ for ind, model_name in enumerate(model_names):
             
             res_dir_p = "%s/%s_neg_%s" % (res_root, "_".join(prompt.split(" ")), "_".join(prompt_neg.split(" ")))
         else:
-            res_dir_p = "%s/%s_%.2f_16" % (res_root, "_".join(prompt.split(" ")), CONTROL_SCALE)
+            res_dir_p = "%s/%s_%.2f" % (res_root, "_".join(prompt.split(" ")), CONTROL_SCALE)
         os.makedirs(res_dir_p, exist_ok=True)
         print(res_dir_p)
         

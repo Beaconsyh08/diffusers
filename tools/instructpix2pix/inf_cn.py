@@ -51,7 +51,7 @@ def preprocess_canny_image(image):
 #            ("make it night", "daytime"),
 #            ("make it night", "sunshine")]
 
-prompts = ["make it happy"]
+prompts = ["make it foggy"]
 
 draw_text = False
 text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "雨天", "snowy": "雪天", "cloudy": "多云", "foggy": "雾天", "contre-jour": "逆光"}
@@ -71,7 +71,7 @@ combine = True
 # test_path = '/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/test_lyy/INS-HM-V0.3.0-5000/rainy'
 # test_path = "/mnt/ve_share/songyuhao/generation/data/test/kl"
 test_path = "/mnt/ve_share/songyuhao/generation/data/test/v0.0"
-res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/cn_test"
+res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
 
 image_paths = []
 for foldername, subfolders, filenames in os.walk(test_path):
@@ -85,7 +85,7 @@ print(n)
 
 for ind, model_name in enumerate(model_names):
     print(model_name)
-    res_dir = "%s/%s" % (res_root, model_name.split("/")[0] + "-" + model_name.split("/")[-1].split("-")[-1]) if "/" in model_name else "%s/%s" % (res_root, model_name)
+    res_dir = "%s/%s-cn" % (res_root, model_name.split("/")[0] + "-" + model_name.split("/")[-1].split("-")[-1]) if "/" in model_name else "%s/%s-cn" % (res_root, model_name)
     os.makedirs(res_dir, exist_ok=True)
     
     if model_name == "INS-Base":

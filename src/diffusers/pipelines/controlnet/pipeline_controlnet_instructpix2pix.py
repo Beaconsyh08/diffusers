@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This model implementation is heavily inspired by https://github.com/haofanwang/ControlNet-for-Diffusers/
+
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -43,7 +45,58 @@ from ..stable_diffusion.safety_checker import StableDiffusionSafetyChecker
 from .multicontrolnet import MultiControlNetModel
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+EXAMPLE_DOC_STRING = """
+    Examples:
+        ```py
+        >>> # !pip install transformers accelerate
+        >>> from diffusers import StableDiffusionControlNetInstructPix2PixPipeline, UNet2DConditionModel, ControlNetModel
+        >>> from diffusers.utils import load_image
+        >>> import numpy as np
+        >>> import cv2
+        >>> import torch
+        >>> from PIL import Image
+
+        >>> init_image = load_image(
+        ...     https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/mountain.png
+        ... )
+        >>> init_image = init_image.resize((512, 512))
+
+        >>> def preprocess_canny_image(image):
+        ...     image = np.array(image)
+        ...     low_threshold = 100
+        ...     high_threshold = 200
+
+        ...     image = cv2.Canny(image, low_threshold, high_threshold)
+        ...     image = image[:, :, None]
+        ...     image = np.concatenate([image, image, image], axis=2)
+        ...     canny_image = Image.fromarray(image)
+        ...     return canny_image
+
+
+        >>> control_image = preprocess_canny_image(init_image)
+
+        >>> controlnet = ControlNetModel.from_pretrained(
+        ...     "lllyasviel/control_v11p_sd15_canny"
+        ... )
+        >>> pipe = StableDiffusionControlNetInstructPix2PixPipeline.from_pretrained(
+        ...     "timbrooks/instruct-pix2pix", controlnet=controlnet
+        ... )
+
+        >>> # generate image
+        >>> image = pipe(
+        ...     "make it rainy",
+        ...     num_inference_steps=50,
+        ...     image=init_image,
+        ...     control_image=control_image,
+        ...     controlnet_conditioning_scale=0.5, 
+        ...     image_guidance_scale=1.5, 
+        ...     guidance_scale=7,
+        ... ).images[0]
+        ```
+"""
+
 
 # Copied from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion_img2img.preprocess
 def preprocess(image):
@@ -254,35 +307,6 @@ class StableDiffusionControlNetInstructPix2PixPipeline(DiffusionPipeline, Textua
                 The percentage of total steps at which the ControlNet starts applying.
             control_guidance_end (`float` or `List[float]`, *optional*, defaults to 1.0):
                 The percentage of total steps at which the ControlNet stops applying.
-
-        Examples:
-
-        ```py
-        >>> import PIL
-        >>> import requests
-        >>> import torch
-        >>> from io import BytesIO
-
-        >>> from diffusers import StableDiffusionControlNetInstructPix2PixPipeline
-
-
-        >>> def download_image(url):
-        ...     response = requests.get(url)
-        ...     return PIL.Image.open(BytesIO(response.content)).convert("RGB")
-
-
-        >>> img_url = "https://huggingface.co/datasets/diffusers/diffusers-images-docs/resolve/main/mountain.png"
-
-        >>> image = download_image(img_url).resize((512, 512))
-
-        >>> pipe = StableDiffusionControlNetInstructPix2PixPipeline.from_pretrained(
-        ...     "timbrooks/instruct-pix2pix", torch_dtype=torch.float16
-        ... )
-        >>> pipe = pipe.to("cuda")
-
-        >>> prompt = "make the mountains snowy"
-        >>> image = pipe(prompt=prompt, image=image).images[0]
-        ```
 
         Returns:
             [`~pipelines.stable_diffusion.StableDiffusionPipelineOutput`] or `tuple`:
