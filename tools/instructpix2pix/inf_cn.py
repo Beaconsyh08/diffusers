@@ -1,5 +1,5 @@
 import os 
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 import PIL
 import torch
 from diffusers import StableDiffusionControlNetInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel, ControlNetModel
@@ -16,6 +16,7 @@ def preprocess_image(url):
     image = PIL.Image.open(url)
     image = PIL.ImageOps.exif_transpose(image)
     image = image.convert("RGB")
+    image = image.resize((768, 576))
     # image = image.resize((1024, 576))
     # image = image.resize((512, 512))
     
@@ -51,7 +52,16 @@ def preprocess_canny_image(image):
 #            ("make it night", "daytime"),
 #            ("make it night", "sunshine")]
 
-prompts = ["make it foggy"]
+prompts = ["make it night"]
+
+# prompts = ["make it dawn", 
+#            "make it dusk", 
+#            "make it night", 
+#            "make it rainy", 
+#            "make it snowy", 
+#            "make it cloudy", 
+#            "make it foggy", 
+#            "make it contre-jour"]
 
 draw_text = False
 text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "雨天", "snowy": "雪天", "cloudy": "多云", "foggy": "雾天", "contre-jour": "逆光"}
@@ -61,7 +71,7 @@ text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "�
 
 # model_names = ["INS-HM-V0.4.3/checkpoint-5000", "INS-HM-V0.4.3/checkpoint-10000", "INS-HM-V0.4.4/checkpoint-5000", "INS-HM-V0.4.4/checkpoint-10000", "INS-HM-V0.4.4", "INS-HM-V0.4.3"]
 # model_names = ["INS-HM-V0.4.0-5000", "INS-HM-V0.3.0-5000", "INS-HM-V0.4.3-5000"]
-model_names = ["INS-HM-V0.4.3-5000"]
+model_names = ["INS-HM-V0.4.2-5000"]
 
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
 # model_dir = "/mnt/share_disk/songyuhao/models/online/diffusions/res/instructpix2pix/model"
@@ -70,16 +80,39 @@ combine = True
 
 # test_path = '/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/test_lyy/INS-HM-V0.3.0-5000/rainy'
 # test_path = "/mnt/ve_share/songyuhao/generation/data/test/kl"
-test_path = "/mnt/ve_share/songyuhao/generation/data/test/v0.0"
-res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/official"
+image_type = "folder"  # folder | txt
+image_type = "txt3"
+# test_path = "/mnt/ve_share/songyuhao/generation/data/test/v0.0"
+test_path = "/mnt/ve_share/leiyayun/git/diffusers/hm_data_txt/fisheye_parkingspace.txt"
+res_root = "/mnt/ve_share/songyuhao/generation/data/result/diffusions/vis/instructpix2pix/lyy_tmp_3"
+controlnet_conditioning_scale_score = 0.3
 
 image_paths = []
-for foldername, subfolders, filenames in os.walk(test_path):
-    for filename in filenames:
-        # Get the full path of the file
-        file_path = os.path.join(foldername, filename)
-        image_paths.append(file_path)
-        
+
+if image_type == "folder":
+    for foldername, subfolders, filenames in os.walk(test_path):
+        for filename in filenames:
+            # Get the full path of the file
+            file_path = os.path.join(foldername, filename)
+            image_paths.append(file_path)
+elif image_type.startswith("txt"):
+    import json
+    with open (test_path, "r") as input_txt:
+        input_json_paths = ["/" + _.strip() for _ in input_txt.readlines()]
+    
+    for input_json_path in tqdm(input_json_paths):
+        with open(input_json_path, "r") as json_obj:
+            json_info = json.load(json_obj)
+        if image_type == "txt1":
+            image_path = "/tos://haomo-public/parking/parking_dataset/apa_pseudo_od/" + json_info["camera"][0]["oss_path"]
+        elif image_type == "txt2":
+            image_path = json_info["imgUrl"]
+        elif image_type == "txt3":
+            image_path = "/" + json_info["camera_synthetic_bev"][0]["oss_path"]
+        image_paths.append(image_path)
+
+import random
+image_paths = random.sample(image_paths, 10)
 n = len(image_paths)
 print(n)
 
@@ -127,7 +160,7 @@ for ind, model_name in enumerate(model_names):
         for i, image_path in tqdm(enumerate(image_paths), total=len(image_paths)):
             test_image = preprocess_image(image_path)
             control_image = preprocess_canny_image(test_image)
-            image = pipe(prompt, image=test_image, num_inference_steps=50, image_guidance_scale=1.5, guidance_scale=7, negative_prompt=prompt_neg, control_image=control_image, controlnet_conditioning_scale=0.5).images[0]
+            image = pipe(prompt, image=test_image, num_inference_steps=50, image_guidance_scale=1.5, guidance_scale=7, negative_prompt=prompt_neg, control_image=control_image, controlnet_conditioning_scale=controlnet_conditioning_scale_score).images[0]
             res_id = "%s/%d.png" % (res_dir_p, i)
             
             if draw_text:

@@ -1,5 +1,5 @@
 import os 
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 import PIL
 import torch
 from diffusers import StableDiffusionControlNetInstructPix2PixPipeline, UniPCMultistepScheduler, UNet2DConditionModel, ControlNetModel
@@ -33,18 +33,18 @@ def preprocess_canny_image(image):
     
     return canny_image
 
-CONTROL_SCALE = 0.5
+CONTROL_SCALE = 0.3
 combine = False
 draw_text = False
 torch_dtype = torch.float32
 text_dict = {"dawn": "清晨", "dusk": "黄昏", "night": "夜晚", "rainy": "雨天", "snowy": "雪天", "cloudy": "多云", "foggy": "雾天", "contre-jour": "逆光"}
 # prompts = ["make it night", ("make it night", "daytime"), ("make it night", "sunshine"), "make it contre-jour", "make it rainy", "make it rainy night", "make it night rainy", "make it backlight"]
 # prompts = ["make it rainy",  "make it contre-jour"]
-prompts = ["make it contre-jour"]
+prompts = ["make it night"]
 
 # model_names = ["INS-HM-V0.4.0-5000", "INS-HM-V0.3.0-5000", "INS-HM-V0.4.3-5000"]
 # model_names = ["INS-HM-V0.3.0-5000", "INS-HM-V0.4.0-5000", "INS-HM-V0.4.3-5000"]
-model_names = ["INS-HM-V0.4.3-5000"]
+model_names = ["INS-HM-V0.4.2-5000"]
 
 model_dir = "/mnt/ve_share/songyuhao/generation/models/online/diffusions/res/instructpix2pix/model"
 
@@ -67,7 +67,7 @@ for foldername, subfolders, filenames in os.walk(test_path):
         
 n = len(image_paths)
 image_paths.sort()
-image_paths = image_paths[:500]
+image_paths = image_paths[4000:]
 print(n)
 
 for ind, model_name in enumerate(model_names):
@@ -103,7 +103,7 @@ for ind, model_name in enumerate(model_names):
             
             res_dir_p = "%s/%s_neg_%s" % (res_root, "_".join(prompt.split(" ")), "_".join(prompt_neg.split(" ")))
         else:
-            res_dir_p = "%s/%s_%.2f" % (res_root, "_".join(prompt.split(" ")), CONTROL_SCALE)
+            res_dir_p = "%s/%s_%.2f-0.4.2" % (res_root, "_".join(prompt.split(" ")), CONTROL_SCALE)
         os.makedirs(res_dir_p, exist_ok=True)
         print(res_dir_p)
         
